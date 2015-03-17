@@ -4,7 +4,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#define SCANLINE_SIZE 100
 #define T_EDGE 50;
 #define DEBUG
 
@@ -12,7 +11,18 @@ using namespace std;
 
 int main()
 {
+  cv::Mat image;
+  image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
+  cv::Mat row = image.row(100);
+
+  int SCANLINE_SIZE = row.size().width;
+
   char scanline[SCANLINE_SIZE];
+  for (int i=0; i<SCANLINE_SIZE; i++) {
+    //TODO: Something wrong in the following
+    scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
+  }
+
   std::vector<char> edge;
   //char edge[SCANLINE_SIZE] = {};
   char t_edge = 2 * T_EDGE;
