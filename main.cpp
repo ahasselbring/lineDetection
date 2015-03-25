@@ -5,7 +5,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #define T_EDGE 50;
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 
@@ -18,10 +18,6 @@ int main()
   int SCANLINE_SIZE = row.size().width;
 
   char scanline[SCANLINE_SIZE];
-  for (int i=0; i<SCANLINE_SIZE; i++) {
-    //TODO: Something wrong in the following
-    scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
-  }
 
   std::vector<char> edge;
   //char edge[SCANLINE_SIZE] = {};
@@ -38,10 +34,17 @@ int main()
   /* Scanline mit random Werten setzen */
   for(int i = 0; i < SCANLINE_SIZE; i++) {
     scanline[i] = (char) rand() % 255;
+
+ //Fill scanline with ones for debugging purpose
+//  for(int i=0; i<SCANLINE_SIZE; i++) {
+//    scanline[i] = (char) 1;
+//  }
+
+//  for (int i=0; i<SCANLINE_SIZE; i++) {
+//    scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
+
 #ifdef DEBUG
-
-    printf("%d \r\n ",scanline[i]);
-
+   printf("%d \r\n ",scanline[i]);
 #endif
   }
 
@@ -76,16 +79,12 @@ int main()
   }
 
 #ifdef DEBUG
-  printf("\r\n**************EDGE POINTS*******************\r\n");
+  printf("\r\n**************EDGE POINTS****************\r\n");
   for(int i = 0;i < edge.size(); i++) {
     printf("%d \r\n", edge[i]);
   }
    printf("***************************************** \r\n");
 #endif
-
-
-
-
 
   return 0;
 }
