@@ -12,11 +12,11 @@ using namespace std;
 int main()
 {
   cv::Mat image;
+
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
-    // Create a window for display.
-    cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE );
-    // Show our image inside it.
-    cv::imshow( "Display window", image);
+  cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE);
+  cv::imshow( "Display window", image);
+
   cv::Vec3b color = image.at<cv::Vec3b>(cv::Point(0,0));
   color[0] = 0;
   color[1] = 0;
@@ -26,7 +26,7 @@ int main()
   char scanline[SCANLINE_SIZE];
 
   std::vector<char> edge;
-  //char edge[SCANLINE_SIZE] = {};
+
   char t_edge = 2 * T_EDGE;
   char g_max = -t_edge;
   char g_min = t_edge;
@@ -35,81 +35,64 @@ int main()
   char fx = 0;
   char g = 0;
 
-  //printf("%d x %d",image.size().width, image.size().height);
+  printf("%d",image.size().height);
 
   for (int k=0;k<image.size().height; k++){
-   cv::Mat row = image.row(k);
-   //row x columns
-   //k x i
+    cv::Mat row = image.row(k);
 
-  printf("\r\n**************SCANLINE*******************\r\n");
-  /* Scanline mit random Werten setzen */
-//  for(int i = 0; i < SCANLINE_SIZE; i++) {
-//    scanline[i] = (char) rand() % 255;
+    printf("\r\nSCANLINE %d\r\n",k);
+    //  for(int i = 0; i < SCANLINE_SIZE; i++) {
+    //    scanline[i] = (char) rand() % 255;
 
- //Fill scanline with ones for debugging purpose
-//  for(int i=0; i<SCANLINE_SIZE; i++) {
-//    scanline[i] = (char) 1;
-//  }
-
-  for (int i=0; i<SCANLINE_SIZE; i++) {
-    scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
-
-#ifdef DEBUG
-  //printf("%d \r\n ",scanline[i]);
-#endif
-  }
-
-   printf("***************************************** \r\n");
-
-  for(int x = 2; x < SCANLINE_SIZE; x+=2) {
-
-    fx = scanline[x];
-    g = fx - fx_last;
-
-    if(g > g_max) {
-
-      if(g_min < -t_edge) {
-        edge.push_back(x_peak);
-         //Pixel färben
-        image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
-        printf("colored");
-      }
-      g_max = g;
-      g_min = t_edge;
-      x_peak = x - 1;
+    for (int i=0; i<SCANLINE_SIZE; i++) {
+      scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
+    //printf("%d \r\n ",scanline[i]);
     }
 
-    if(g < g_min) {
+    for(int x = 2; x < SCANLINE_SIZE; x+=2) {
 
-      if(g_max > t_edge) {
-        edge.push_back(x_peak);
-        //Pixel färben
-        image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
-        printf("colored");
+      fx = scanline[x];
+      g = fx - fx_last;
+
+      if(g > g_max) {
+
+        if(g_min < -t_edge) {
+          edge.push_back(x_peak);
+           //Pixel färben
+          image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
+          printf("colored");
+        }
+        g_max = g;
+        g_min = t_edge;
+        x_peak = x - 1;
       }
-      g_min = g;
-      g_max = -t_edge;
-      x_peak = x - 1;
+
+      if(g < g_min) {
+
+        if(g_max > t_edge) {
+          edge.push_back(x_peak);
+          //Pixel färben
+          image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
+          printf("colored");
+        }
+        g_min = g;
+        g_max = -t_edge;
+        x_peak = x - 1;
+      }
+      fx_last = fx;
+
     }
-    fx_last = fx;
 
+    printf("\r\nEDGE POINTS %d\r\n", k);
+    for(int i = 0;i < edge.size(); i++) {
+        printf("%d \r\n", edge[i]);
+    }
   }
 
-#ifdef DEBUG
-  printf("\r\n**************EDGE POINTS****************\r\n");
-  for(int i = 0;i < edge.size(); i++) {
-    printf("%d \r\n", edge[i]);
-  }
-   printf("***************************************** \r\n");
-#endif
-}
-
-    // Create a window for display.
-    cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE );
-    // Show our image inside it.
-    cv::imshow( "Display window", image);
-    cv::waitKey(0);
+  cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE );
+  // Show our image inside it.
+  cv::imshow( "Display window", image);
+  cv::waitKey(0);
 
   return 0;
 }
