@@ -4,7 +4,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#define T_EDGE 50;
+#define T_EDGE 20;
 #define DEBUG
 
 using namespace std;
