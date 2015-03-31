@@ -12,12 +12,13 @@ using namespace std;
 int main()
 {
   cv::Mat image;
-
+  //cv::Mat orig;
+  //orig = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
-  cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE);
-  cv::imshow( "Display window", image);
+  // cv::namedWindow( "original", CV_WINDOW_FREERATIO);
+  //cv::imshow( "original", orig);
 
-  cv::Vec3b color = image.at<cv::Vec3b>(cv::Point(0,0));
+  cv::Vec3b color;// = image.at<cv::Vec3b>(0,0);
   color[0] = 0;
   color[1] = 0;
   color[2] = 255;
@@ -35,17 +36,17 @@ int main()
   char fx = 0;
   char g = 0;
 
-  printf("%d",image.size().height);
+  //printf("%d",image.size().height);
 
   for (int k=0;k<image.size().height; k++){
-    cv::Mat row = image.row(k);
+    //cv::Mat row = image.row(k);
 
-    printf("\r\nSCANLINE %d\r\n",k);
+    //printf("\r\nSCANLINE %d\r\n",k);
     //  for(int i = 0; i < SCANLINE_SIZE; i++) {
     //    scanline[i] = (char) rand() % 255;
 
     for (int i=0; i<SCANLINE_SIZE; i++) {
-      scanline[i] = (row.at<cv::Vec3b>(0,i))[0];
+      scanline[i] = (image.at<cv::Vec3b>(k,i))[0];
     //printf("%d \r\n ",scanline[i]);
     }
 
@@ -59,8 +60,8 @@ int main()
         if(g_min < -t_edge) {
           edge.push_back(x_peak);
            //Pixel färben
-          image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
-          printf("colored");
+          image.at<cv::Vec3b>(k,x_peak) = color;
+          printf("%d,%d\n",k,x_peak);
         }
         g_max = g;
         g_min = t_edge;
@@ -72,8 +73,8 @@ int main()
         if(g_max > t_edge) {
           edge.push_back(x_peak);
           //Pixel färben
-          image.at<cv::Vec3b>(cv::Point(k,x_peak)) = color;
-          printf("colored");
+          image.at<cv::Vec3b>(k,x_peak) = color;
+          printf("%d,%d\n",k,x_peak);
         }
         g_min = g;
         g_max = -t_edge;
@@ -83,15 +84,14 @@ int main()
 
     }
 
-    printf("\r\nEDGE POINTS %d\r\n", k);
+    //printf("\r\nEDGE POINTS %d\r\n", k);
     for(int i = 0;i < edge.size(); i++) {
-        printf("%d \r\n", edge[i]);
+        //printf("%d \r\n", edge[i]);
     }
   }
 
-  cv::namedWindow( "Display window", CV_WINDOW_AUTOSIZE );
-  // Show our image inside it.
-  cv::imshow( "Display window", image);
+  cv::namedWindow( "image", CV_WINDOW_AUTOSIZE );
+  cv::imshow( "image", image);
   cv::waitKey(0);
 
   return 0;
