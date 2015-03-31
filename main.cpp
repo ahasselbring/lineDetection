@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void edgeDetection(int k, cv::Mat *image){
+void edgeDetection(int column, cv::Mat *image){
 
   cv::Vec3b color;
   color[0] = 0;
@@ -18,7 +18,7 @@ void edgeDetection(int k, cv::Mat *image){
 
   std::vector<char> edge;
 
-  int SCANLINE_SIZE = image->size().width;
+  int SCANLINE_SIZE = image->size().height;
   int scanline[SCANLINE_SIZE];
 
   int t_edge = 2 * T_EDGE;
@@ -29,8 +29,8 @@ void edgeDetection(int k, cv::Mat *image){
   int fx = 0;
   int g = 0;
 
-  for (int i=0; i<SCANLINE_SIZE; i++) {
-    scanline[i] = (image->at<cv::Vec3b>(k,i))[0];
+  for (int x=0; x<SCANLINE_SIZE; x++) {
+    scanline[x] = (image->at<cv::Vec3b>(x,column))[0];
   }
 
   for(int x = 2; x < SCANLINE_SIZE; x=x+2) {
@@ -39,7 +39,9 @@ void edgeDetection(int k, cv::Mat *image){
     if(g > g_max) {
       if(g_min < (-t_edge)) {
         edge.push_back(x_peak);
-        image->at<cv::Vec3b>(k,x_peak) = color;
+        printf("%d,%d\n",x_peak,column);
+        image->at<cv::Vec3b>(x_peak,column) = color;
+        //image->at<cv::Vec3b>(column,x_peak) = color;
       }
       g_max = g;
       g_min = t_edge;
@@ -49,7 +51,9 @@ void edgeDetection(int k, cv::Mat *image){
     if(g < g_min) {
       if(g_max > t_edge) {
         edge.push_back(x_peak);
-        image->at<cv::Vec3b>(k,x_peak) = color;
+        printf("%d,%d\n",x_peak,column);
+        image->at<cv::Vec3b>(x_peak,column) = color;
+        //image->at<cv::Vec3b>(column,x_peak) = color;
       }
       g_min = g;
       g_max = (-t_edge);
@@ -65,8 +69,8 @@ int main()
   cv::Mat image;
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
 
-  for (int k=0;k<image.size().height; k++){
-    edgeDetection(k, &image);
+  for (int column=0;column<image.size().width; column++){
+    edgeDetection(column, &image);
   }
 
   cv::namedWindow( "image", CV_WINDOW_AUTOSIZE );

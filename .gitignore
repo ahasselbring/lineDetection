@@ -2,3 +2,5 @@ lineDetection.pro.user
 *.user
 *.o
 main.o
+lineDetection.o
+main.o
