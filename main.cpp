@@ -9,24 +9,14 @@
 
 using namespace std;
 
-int main()
-{
-  cv::Mat image;
-  //cv::Mat orig;
-  //orig = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
-  image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
-  // cv::namedWindow( "original", CV_WINDOW_FREERATIO);
-  //cv::imshow( "original", orig);
+void edgeDetection(int k, cv::Mat *image, cv::Vec3b *p_color){
 
-  cv::Vec3b color;// = image.at<cv::Vec3b>(0,0);
-  color[0] = 0;
-  color[1] = 0;
-  color[2] = 255;
-
-  int SCANLINE_SIZE = image.size().width;
-  char scanline[SCANLINE_SIZE];
+  cv::Vec3b color = *p_color;
 
   std::vector<char> edge;
+
+  int SCANLINE_SIZE = image->size().width;
+  char scanline[SCANLINE_SIZE];
 
   char t_edge = 2 * T_EDGE;
   char g_max = -t_edge;
@@ -36,31 +26,18 @@ int main()
   char fx = 0;
   char g = 0;
 
-  //printf("%d",image.size().height);
-
-  for (int k=0;k<image.size().height; k++){
-    //cv::Mat row = image.row(k);
-
-    //printf("\r\nSCANLINE %d\r\n",k);
-    //  for(int i = 0; i < SCANLINE_SIZE; i++) {
-    //    scanline[i] = (char) rand() % 255;
-
     for (int i=0; i<SCANLINE_SIZE; i++) {
-      scanline[i] = (image.at<cv::Vec3b>(k,i))[0];
-    //printf("%d \r\n ",scanline[i]);
+      scanline[i] = (image->at<cv::Vec3b>(k,i))[0];
     }
 
     for(int x = 2; x < SCANLINE_SIZE; x+=2) {
-
       fx = scanline[x];
       g = fx - fx_last;
-
       if(g > g_max) {
-
-        if(g_min < -t_edge) {
+        if(g_min < (-t_edge)) {
           edge.push_back(x_peak);
            //Pixel färben
-          image.at<cv::Vec3b>(k,x_peak) = color;
+          image->at<cv::Vec3b>(k,x_peak) = color;
           printf("%d,%d\n",k,x_peak);
         }
         g_max = g;
@@ -69,25 +46,33 @@ int main()
       }
 
       if(g < g_min) {
-
         if(g_max > t_edge) {
           edge.push_back(x_peak);
           //Pixel färben
-          image.at<cv::Vec3b>(k,x_peak) = color;
+          image->at<cv::Vec3b>(k,x_peak) = color;
           printf("%d,%d\n",k,x_peak);
         }
         g_min = g;
-        g_max = -t_edge;
+        g_max = (-t_edge);
         x_peak = x - 1;
       }
       fx_last = fx;
-
     }
+}
 
-    //printf("\r\nEDGE POINTS %d\r\n", k);
-    for(int i = 0;i < edge.size(); i++) {
-        //printf("%d \r\n", edge[i]);
-    }
+
+int main()
+{
+  cv::Mat image;
+  image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
+
+  cv::Vec3b color;
+  color[0] = 0;
+  color[1] = 0;
+  color[2] = 255;
+
+  for (int k=0;k<image.size().height; k++){
+    edgeDetection(k, &image, &color);
   }
 
   cv::namedWindow( "image", CV_WINDOW_AUTOSIZE );
