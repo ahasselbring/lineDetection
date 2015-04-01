@@ -4,3 +4,6 @@ lineDetection.pro.user
 main.o
 lineDetection.o
 lineDetection.pro
+Makefile
+lineDetection
+
