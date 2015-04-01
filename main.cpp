@@ -92,7 +92,6 @@ int main()
   edgeDetection(&image, &imageEdges_160, t_edge);
   cv::imwrite ("160.png", imageEdges_160, vector<int>());
 
-
   //cv::imshow("40", imageEdges_40);
 
   return 0;
