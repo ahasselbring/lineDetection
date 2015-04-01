@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <chrono>
+#include <ctime>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
@@ -59,7 +61,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, int
 }
 
 void edgeDetection(cv::Mat *image,cv::Mat *imageEdges, int t_edge) {
-  for (int column=0;column<image->size().width; column++){
+  for (int column=0;column<image->size().width; column+=2){
     edgeDetectionOnScanline(column, image, imageEdges, t_edge);
   }
 }
@@ -68,31 +70,19 @@ int main()
 {
   cv::Mat image;
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
-  cv::Mat imageEdges_0(image.size().height, image.size().width, CV_8UC3);
-  cv::Mat imageEdges_40(image.size().height, image.size().width, CV_8UC3);
-  cv::Mat imageEdges_80(image.size().height, image.size().width, CV_8UC3);
-  cv::Mat imageEdges_120(image.size().height, image.size().width, CV_8UC3);
-  cv::Mat imageEdges_160(image.size().height, image.size().width, CV_8UC3);
+  cv::Mat imageEdges(image.size().height, image.size().width, CV_8UC3);
 
   int t_edge;
-  t_edge = 0;
-
-  edgeDetection(&image, &imageEdges_0, t_edge);
-  cv::imwrite ("0.png",imageEdges_0, vector<int>());
   t_edge = 40;
-  edgeDetection(&image, &imageEdges_40, t_edge);
-  cv::imwrite ("40.png", imageEdges_40, vector<int>());
-  t_edge = 80;
-  edgeDetection(&image, &imageEdges_80, t_edge);
-  cv::imwrite ("80.png", imageEdges_80, vector<int>());
-  t_edge = 120;
-  edgeDetection(&image, &imageEdges_120, t_edge);
-  cv::imwrite ("120.png", imageEdges_120, vector<int>());
-  t_edge = 160;
-  edgeDetection(&image, &imageEdges_160, t_edge);
-  cv::imwrite ("160.png", imageEdges_160, vector<int>());
+  std::chrono::duration<float, std::ratio<1, 1000>> delta;
 
-  //cv::imshow("40", imageEdges_40);
+  chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
+  edgeDetection(&image, &imageEdges, t_edge);
+  delta = chrono::system_clock::now() - startTime;
+
+  printf("%f",delta.count());
+  cv::imwrite ("40.png",imageEdges, vector<int>());
+
 
   return 0;
 }
