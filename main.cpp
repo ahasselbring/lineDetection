@@ -103,7 +103,7 @@ int median(cv::Mat *image, int x, int column, int channel){
 }
 
 int medianOfFive(int a, int b, int c, float d, float e){
-  return b<a ? d < c ? b < d ? a < e ? e < d ? e : d
+  return b < a ? d < c ? b < d ? a < e ? a < d ? e < d ? e : d
                                      : c < a ? c : a
                              : e < d ? a < d ? a : d
                                      : c < e ? c : e
