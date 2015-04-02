@@ -17,6 +17,75 @@
 
 using namespace std;
 
+int medianOfFive(int a, int b, int c, float d, float e){
+  return b < a ? d < c ? b < d ? a < e ? a < d ? e < d ? e : d
+                                               : c < a ? c : a
+                                       : e < d ? a < d ? a : d
+                                               : c < e ? c : e
+                                :c < e ? b < c ? a < c ? a : c
+                                               : e < b ? e : b
+                                       : b < e ? a < e ? a : e
+                                               : c < b ? c : b
+                       : b < c ? a < e ? a < c ? e < c ? e : c
+                                               : d < a ? d : a
+                                       : e < c ? a < c ? a : c
+                                               : d < e ? d : e
+                               : d < e ? b < d ? a < d ? a : d
+                                               : e < b ? e : b
+                                       : b < e ? a < e ? a : e
+                                               : d < b ? d : b
+               : d < c ? a < d ? b < e ? b < d ? e < d ? e : d
+                                               : c < b ? c : b
+                                       : e < d ? b < d ? b : d
+                                               : c < e ? c : e
+                               : c < e ? a < c ? b < c ? b : c
+                                               : e < a ? e : a
+                                       : a < e ? b < e ? b : e
+                                               : c < a ? c : a
+                       : a < c ? b < e ? b < c ? e < c ? e : c
+                                               : d < b ? d : b
+                                       : e < c ? b < c ? b : c
+                                               : d < e ? d : e
+                               : d < e ? a < d ? b < d ? b : d
+                                               : e < a ? e : a
+                                       : a < e ? b < e ? b : e
+                                               : d < a ? d : a;
+}
+
+int median(cv::Mat *image, int x, int column, int channel){
+  int medianArray[5];
+  for(int i=0; i<5; i++){
+    //x-2, x-1, x, x+1, x+2
+    medianArray[i]=image->at<cv::Vec3b>((x+i)-2,column)[channel];
+  }
+  return medianOfFive(medianArray[0],medianArray[1],medianArray[2],medianArray[3],medianArray[4]);
+}
+
+bool checkForLine(int Y, int Cb, int Cr) {
+  if((Cr-FIELD_CR)<T_CR){
+    if((Cb-FIELD_CB)<T_CB){
+      if((Y-FIELD_Y)<T_Y){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void classifyEdge(cv::Mat *image, cv::Mat *imageLines, int x, int column){
+  if(checkForLine(median(image, x, column, 0),median(image, x, column, 1),median(image, x, column, 2))) {
+    //x,column ist eine weiße linie auf dem spielfeld.
+    //dies nun in ein neues bild malen
+
+    cv::Vec3b color;
+    color[0] = 255;
+    color[1] = 255;
+    color[2] = 255;
+
+    imageLines->at<cv::Vec3b>(x,column) = color;
+  }
+}
+
 void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge){
 
   cv::Vec3b color;
@@ -47,7 +116,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
       if(g_min < (-t_edge)) {
         edge.push_back(x_peak);
         //imageEdges->at<cv::Vec3b>(x_peak,column) = color;
-        classifyEdge(&image, &imageLines, x_peak,column);
+        classifyEdge(image, imageLines, x_peak,column);
       }
       g_max = g;
       g_min = t_edge;
@@ -58,7 +127,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
       if(g_max > t_edge) {
         edge.push_back(x_peak);
         //imageEdges->at<cv::Vec3b>(x_peak,column) = color;
-        classifyEdge(&image, &imageLines, x_peak,column);
+        classifyEdge(image, imageLines, x_peak,column);
       }
       g_min = g;
       g_max = (-t_edge);
@@ -72,82 +141,6 @@ void edgeDetection(cv::Mat *image, cv::Mat *imageLines, cv::Mat *imageEdges, int
   //+2 cause of downsampling
   for (int column=0;column<image->size().width; column+=2){
     edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge);
-  }
-}
-
-bool checkForLine(int Y, int Cb, int Cr) {
-  if((Cr-FIELD_CR)<T_CR){
-    if((Cb-FIELD_CB)<T_CB){
-      if((Y-FIELD_Y)<T_Y){
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-int median(cv::Mat *image, int x, int column, int channel){
-  int medianArray[5];
-  for(int i=0; i<5; i++){
-    //x-2, x-1, x, x+1, x+2
-    medianArray[i]=image->at<cv::Vec3b>((x+i)-2,column)[channel];
-  }
-  for(int k=0; k<5; k++){
-    for(int l=0; l<5; l++){
-
-    }
-  }
-  //medianArray sortieren und das mittlere Element nehmen oder
-  //über eine funktion den median dieser 5 zahlen herausfinden
-  //return median
-}
-
-int medianOfFive(int a, int b, int c, float d, float e){
-  return b < a ? d < c ? b < d ? a < e ? a < d ? e < d ? e : d
-                                     : c < a ? c : a
-                             : e < d ? a < d ? a : d
-                                     : c < e ? c : e
-                      :c < e ? b < c ? a < c ? a : c
-                                     : e < b ? e : b
-                             : b < e ? a < e ? a : e
-                                     : c < b ? c : b
-             : b < c ? a < e ? a < c ? e < c ? e : c
-                                     : d < a ? d : a
-                             : e < c ? a < c ? a : c
-                                     : d < e ? d : e
-                     : d < e ? b < d ? a < d ? a : d
-                                     : e < b ? e : b
-                             : b < e ? a < e ? a : e
-                                     : d < b ? d : b
-     : d < c ? a < d ? b < e ? b < d ? e < d ? e : d
-                                     : c < b ? c : b
-                             : e < d ? b < d ? b : d
-                                     : c < e ? c : e
-                     : c < e ? a < c ? b < c ? b : c
-                                     : e < a ? e : a
-                             : a < e ? b < e ? b : e
-                                     : c < a ? c : a
-             : a < c ? b < e ? b < c ? e < c ? e : c
-                                     : d < b ? d : b
-                             : e < c ? b < c ? b : c
-                                     : d < e ? d : e
-                     : d < e ? a < d ? b < d ? b : d
-                                     : e < a ? e : a
-                             : a < e ? b < e ? b : e
-                                     : d < a ? d : a;
-}
-
-void classifyEdge(cv::Mat *image, cv::Mat *imageLines, int x, int column){
-  if(checkForLine(median(image, x, column, 0),median(image, x, column, 1),median(image, x, column, 2))) {
-    //x,column ist eine weiße linie auf dem spielfeld.
-    //dies nun in ein neues bild malen
-
-    cv::Vec3b color;
-    color[0] = 255;
-    color[1] = 255;
-    color[2] = 255;
-
-    imageLines->at<cv::Vec3b>(x,column) = color;
   }
 }
 
