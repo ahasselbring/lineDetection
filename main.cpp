@@ -86,7 +86,7 @@ void classifyEdges(cv::Mat *image, cv::Mat *imageLines, int x, int column){
   }
 }
 
-void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge){
+void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge, std::vector<cv::Vec3b*> *edgePointer){
 
   cv::Vec3b color;
   color[0] = 255;
@@ -95,7 +95,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
 
   std::vector<char> edge;
 
-  vector<cv::Vec3b*> edgePointer;
+//  vector<cv::Vec3b*> edgePointer;
 
 //  cv::Vec3b *p = &(image->at<cv::Vec3b>(0,0));
 //  edgePointer.push_back(p);
@@ -142,6 +142,8 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
       if(g_min < (-t_edge)) {
         edge.push_back(x_peak);
         //edges.push_back(imageEdges->at<cv::Vec3b>(x_peak,column));
+        //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
+        edgePointer->push_back(new cv::Vec2i(x_peak, column));
         imageEdges->at<cv::Vec3b>(x_peak,column) = color;
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
@@ -155,6 +157,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
       if(g_max > t_edge) {
         edge.push_back(x_peak);
         imageEdges->at<cv::Vec3b>(x_peak,column) = color;
+        edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
       }
@@ -166,10 +169,10 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
   }
 }
 
-void edgeDetection(cv::Mat *image, cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge) {
+void edgeDetection(cv::Mat *image, cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge, std::vector<cv::Vec3b*> *edgePointer) {
   //+2 cause of downsampling
   for (int column=0;column<image->size().width; column+=2){
-    edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge);
+    edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
   }
 }
 
@@ -180,13 +183,21 @@ int main()
   cv::Mat imageEdges(image.size().height, image.size().width, CV_8UC3);
   cv::Mat imageLines(image.size().height, image.size().width, CV_8UC3);
 
+  //vector<cv::Vec3b*> edgePointer;
+  vector<cv::Vec2i> edgePointer;
+
   int t_edge;
   t_edge = 8;
   std::chrono::duration<float, std::ratio<1, 1000>> delta;
 
   chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
-  edgeDetection(&image, &imageEdges, &imageLines, t_edge);
+  edgeDetection(&image, &imageEdges, &imageLines, t_edge, &edgePointer);
   delta = chrono::system_clock::now() - startTime;
+
+//  cout << edgePointer.size() << endl;
+//  for (int i=0; i<edgePointer.size(); i++){
+//    cout << *edgePointer[i] << endl;
+//  }
 
   printf("%f",delta.count());
   cv::imwrite ("result_edges.png",imageEdges, vector<int>());
