@@ -17,51 +17,51 @@
 
 using namespace std;
 
-int medianOfFive(int a, int b, int c, float d, float e){
+int medianOfFive(int a, int b, int c, int d, int e){
   return b < a ? d < c ? b < d ? a < e ? a < d ? e < d ? e : d
-                                               : c < a ? c : a
-                                       : e < d ? a < d ? a : d
-                                               : c < e ? c : e
-                                :c < e ? b < c ? a < c ? a : c
-                                               : e < b ? e : b
-                                       : b < e ? a < e ? a : e
-                                               : c < b ? c : b
-                       : b < c ? a < e ? a < c ? e < c ? e : c
-                                               : d < a ? d : a
-                                       : e < c ? a < c ? a : c
-                                               : d < e ? d : e
-                               : d < e ? b < d ? a < d ? a : d
-                                               : e < b ? e : b
-                                       : b < e ? a < e ? a : e
-                                               : d < b ? d : b
-               : d < c ? a < d ? b < e ? b < d ? e < d ? e : d
-                                               : c < b ? c : b
-                                       : e < d ? b < d ? b : d
-                                               : c < e ? c : e
-                               : c < e ? a < c ? b < c ? b : c
-                                               : e < a ? e : a
-                                       : a < e ? b < e ? b : e
-                                               : c < a ? c : a
-                       : a < c ? b < e ? b < c ? e < c ? e : c
-                                               : d < b ? d : b
-                                       : e < c ? b < c ? b : c
-                                               : d < e ? d : e
-                               : d < e ? a < d ? b < d ? b : d
-                                               : e < a ? e : a
-                                       : a < e ? b < e ? b : e
-                                               : d < a ? d : a;
+                                                       : c < a ? c : a
+                                                               : e < d ? a < d ? a : d
+                                                                               : c < e ? c : e
+                                                                                       :c < e ? b < c ? a < c ? a : c
+                                                                                                              : e < b ? e : b
+                                                                                                                      : b < e ? a < e ? a : e
+                                                                                                                                      : c < b ? c : b
+                                                                                                                                              : b < c ? a < e ? a < c ? e < c ? e : c
+                                                                                                                                                                              : d < a ? d : a
+                                                                                                                                                                                      : e < c ? a < c ? a : c
+                                                                                                                                                                                                      : d < e ? d : e
+                                                                                                                                                                                                              : d < e ? b < d ? a < d ? a : d
+                                                                                                                                                                                                                                      : e < b ? e : b
+                                                                                                                                                                                                                                              : b < e ? a < e ? a : e
+                                                                                                                                                                                                                                                              : d < b ? d : b
+                                                                                                                                                                                                                                                                      : d < c ? a < d ? b < e ? b < d ? e < d ? e : d
+                                                                                                                                                                                                                                                                                                              : c < b ? c : b
+                                                                                                                                                                                                                                                                                                                      : e < d ? b < d ? b : d
+                                                                                                                                                                                                                                                                                                                                      : c < e ? c : e
+                                                                                                                                                                                                                                                                                                                                              : c < e ? a < c ? b < c ? b : c
+                                                                                                                                                                                                                                                                                                                                                                      : e < a ? e : a
+                                                                                                                                                                                                                                                                                                                                                                              : a < e ? b < e ? b : e
+                                                                                                                                                                                                                                                                                                                                                                                              : c < a ? c : a
+                                                                                                                                                                                                                                                                                                                                                                                                      : a < c ? b < e ? b < c ? e < c ? e : c
+                                                                                                                                                                                                                                                                                                                                                                                                                                      : d < b ? d : b
+                                                                                                                                                                                                                                                                                                                                                                                                                                              : e < c ? b < c ? b : c
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              : d < e ? d : e
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                      : d < e ? a < d ? b < d ? b : d
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              : e < a ? e : a
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      : a < e ? b < e ? b : e
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      : d < a ? d : a;
 }
 
-int median(cv::Mat *image, int x, int column, int channel){
-  int medianArray[5];
-  for(int i=0; i<5; i++){
-    //x-2, x-1, x, x+1, x+2
-    medianArray[i]=image->at<cv::Vec3b>((x+i)-2,column)[channel];
-  }
-  return medianOfFive(medianArray[0],medianArray[1],medianArray[2],medianArray[3],medianArray[4]);
-}
+//int median(cv::Mat *image, int x, int column, int channel){
+//  int medianArray[5];
+//  for(int i=0; i<5; i++){
+//    //x-2, x-1, x, x+1, x+2
+//    medianArray[i]=image->at<cv::Vec3b>((x+i)-2,column)[channel];
+//  }
+//  return medianOfFive(medianArray[0],medianArray[1],medianArray[2],medianArray[3],medianArray[4]);
+//}
 
-bool checkForLine(int Y, int Cb, int Cr) {
+bool fieldCheck(int Y, int Cb, int Cr) {
   if((Cr-FIELD_CR)<T_CR){
     if((Cb-FIELD_CB)<T_CB){
       if((Y-FIELD_Y)<T_Y){
@@ -72,19 +72,19 @@ bool checkForLine(int Y, int Cb, int Cr) {
   return false;
 }
 
-void classifyEdges(cv::Mat *image, cv::Mat *imageLines, int x, int column){
-  if(checkForLine(median(image, x, column, 0),median(image, x, column, 1),median(image, x, column, 2))) {
-    //x,column ist eine weiße linie auf dem spielfeld.
-    //dies nun in ein neues bild malen
+//void classifyEdges(cv::Mat *image, cv::Mat *imageLines, int x, int column){
+//  if(checkForLine(median(image, x, column, 0),median(image, x, column, 1),median(image, x, column, 2))) {
+//    //x,column ist eine weiße linie auf dem spielfeld.
+//    //dies nun in ein neues bild malen
 
-    cv::Vec3b color;
-    color[0] = 255;
-    color[1] = 255;
-    color[2] = 255;
+//    cv::Vec3b color;
+//    color[0] = 255;
+//    color[1] = 255;
+//    color[2] = 255;
 
-    imageLines->at<cv::Vec3b>(x,column) = color;
-  }
-}
+//    imageLines->at<cv::Vec3b>(x,column) = color;
+//  }
+//}
 
 void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge, std::vector<cv::Vec2i> *edgePointer){
 
@@ -95,31 +95,31 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
 
   std::vector<char> edge;
 
-//  vector<cv::Vec3b*> edgePointer;
+  //  vector<cv::Vec3b*> edgePointer;
 
-//  cv::Vec3b *p = &(image->at<cv::Vec3b>(0,0));
-//  edgePointer.push_back(p);
-//  cout << "Größe: " << edgePointer.size() << " " << *edgePointer[0] << endl;
+  //  cv::Vec3b *p = &(image->at<cv::Vec3b>(0,0));
+  //  edgePointer.push_back(p);
+  //  cout << "Größe: " << edgePointer.size() << " " << *edgePointer[0] << endl;
 
-//  std::vector<vector<int>> edges(4, vector<int>(4));
-//  edges[1][2] = 10;
-//  cout << edges [3][3] << endl;
+  //  std::vector<vector<int>> edges(4, vector<int>(4));
+  //  edges[1][2] = 10;
+  //  cout << edges [3][3] << endl;
 
-//  std::vector<*std::vector<int>> edgePointers;
-//  edgePointers.push_back();
+  //  std::vector<*std::vector<int>> edgePointers;
+  //  edgePointers.push_back();
 
-//  std::vector<int[]> edges;  std::vector<int[]> edges;
-//  int test[] = {1,2};
-//  edges.push_back(test);
-//  int test[] = {1,2};
-//  edges.push_back(test);
+  //  std::vector<int[]> edges;  std::vector<int[]> edges;
+  //  int test[] = {1,2};
+  //  edges.push_back(test);
+  //  int test[] = {1,2};
+  //  edges.push_back(test);
 
-//  uchar* p;
-//  p=image->ptr(0);
+  //  uchar* p;
+  //  p=image->ptr(0);
 
-//  std::vector<int[]> edges;
-//  int test[0];
-//  edges.push_back(test);
+  //  std::vector<int[]> edges;
+  //  int test[0];
+  //  edges.push_back(test);
 
   int SCANLINE_SIZE = image->size().height;
   int scanline[SCANLINE_SIZE];
@@ -178,11 +178,85 @@ void edgeDetection(cv::Mat *image, cv::Mat *imageEdges, cv::Mat *imageLines, int
   }
 }
 
+void setRegion(cv::Mat *imageRegions, int startX, int endX, int column, int regionType){
+  //regionType
+  //1-field
+  //2-line
+  //3-unknown
+  cv::Vec3b green;
+  green[0] = 0;
+  green[1] = 255;
+  green[2] = 0;
+  cv::Vec3b white;
+  white[0] = 255;
+  white[1] = 255;
+  white[2] = 255;
+  cv::Vec3b red;
+  red[0] = 255;
+  red[1] = 0;
+  red[2] = 0;
+  if(regionType==1){
+    for(int i=startX; i<=endX; i++){
+      imageRegions->at<cv::Vec3b>(startX,endX) = green;
+    }
+  }
+  else if (regionType=2){
+    for(int i=startX; i<=endX; i++){
+      imageRegions->at<cv::Vec3b>(startX,endX) = white;
+    }
+  }
+  else if (regionType=3){
+    for(int i=startX; i<=endX; i++){
+      imageRegions->at<cv::Vec3b>(startX,endX) = red;
+    }
+  }
+}
+
+void classifyRegions(cv::Mat *image, cv::Mat *imageRegions, std::vector<cv::Vec2i> *edgePointer){
+  int current_column = 0;
+  int previous_column = 0;
+  int current_x = 0;
+  int next_x = 0;
+  int diff = 0;
+  int gap = 0;
+  int median_Y = 0;
+  int median_Cb = 0;
+  int median_Cr = 0;
+  //  std::vector<cv::Vec2i> test = *edgePointer;
+  //  cv::Vec2i test2 = (*edgePointer)[0];
+  //  int test3 = (*edgePointer)[0][1];
+  //  cout << test3 << endl;
+  for (int i=0; i<edgePointer->size(); i++){
+    if((*edgePointer)[i][1]==current_column){
+      //later on this is to optimize
+      //do not save current and previous x temporally
+      //current_column = edgePointer[i][1];
+      current_x = (*edgePointer)[i][0];
+      next_x = (*edgePointer)[i+1][0];
+      diff = next_x-current_x;
+      gap = diff/6; //TODO: magic number
+
+
+      median_Y = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[0],image->at<cv::Vec3b>(i+2*gap,current_column)[0],image->at<cv::Vec3b>(i+3*gap,current_column)[0],image->at<cv::Vec3b>(i+4*gap,current_column)[0],image->at<cv::Vec3b>(i+5*gap,current_column)[0]);
+      median_Cb = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[1],image->at<cv::Vec3b>(i+2*gap,current_column)[1],image->at<cv::Vec3b>(i+3*gap,current_column)[1],image->at<cv::Vec3b>(i+4*gap,current_column)[1],image->at<cv::Vec3b>(i+5*gap,current_column)[1]);
+      median_Cr = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[2],image->at<cv::Vec3b>(i+2*gap,current_column)[2],image->at<cv::Vec3b>(i+3*gap,current_column)[2],image->at<cv::Vec3b>(i+4*gap,current_column)[2],image->at<cv::Vec3b>(i+5*gap,current_column)[2]);
+      cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
+      if(fieldCheck(median_Y,median_Cb,median_Cr)){
+        setRegion(imageRegions, current_x, next_x, current_column, 1);
+      }
+    }
+    else { //next column
+
+    }
+  }
+}
+
 int main()
 {
   cv::Mat image;
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
   cv::Mat imageEdges(image.size().height, image.size().width, CV_8UC3);
+  cv::Mat imageRegions(image.size().height, image.size().width, CV_8UC3);
   cv::Mat imageLines(image.size().height, image.size().width, CV_8UC3);
 
   //vector<cv::Vec3b*> edgePointer;
@@ -200,15 +274,27 @@ int main()
   edgeDetection(&image, &imageEdges, &imageLines, t_edge, &edgePointer);
   delta = chrono::system_clock::now() - startTime;
 
-  cout << "Size: " << edgePointer.size() << endl;
+  classifyRegions(&image, &imageRegions, &edgePointer);
 
-//  cout << edgePointer.size() << endl;
-//  for (int i=0; i<edgePointer.size(); i++){
-//    cout << *edgePointer[i] << endl;
-//  }
+  //  cout << "Size: " << edgePointer.size() << endl;
+  //  cout << edgePointer[0][1] << endl;
+  //  int test = edgePointer[0][1];
+  //  cout << test << endl;
+
+  //  cout << edgePointer[1] << endl;
+  //  cout << edgePointer[2] << endl;
+  //  cout << edgePointer[3] << endl;
+  //  cout << edgePointer[4] << endl;
+
+
+  //  cout << edgePointer.size() << endl;
+  //  for (int i=0; i<edgePointer.size(); i++){
+  //    cout << *edgePointer[i] << endl;
+  //  }
 
   printf("%f",delta.count());
   cv::imwrite ("result_edges.png",imageEdges, vector<int>());
+  cv::imwrite ("result_regions.png",imageRegions, vector<int>());
   cv::imwrite ("result_lines.png",imageLines, vector<int>());
 
   return 0;
