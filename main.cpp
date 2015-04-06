@@ -183,38 +183,33 @@ void setRegion(cv::Mat *imageRegions, int startX, int endX, int column, int regi
   //1-field
   //2-line
   //3-unknown
-  cv::Vec3b green;
-  green[0] = 0;
-  green[1] = 255;
-  green[2] = 0;
-  cv::Vec3b white;
-  white[0] = 255;
-  white[1] = 255;
-  white[2] = 255;
-  cv::Vec3b red;
-  red[0] = 255;
-  red[1] = 0;
-  red[2] = 0;
-  if(regionType==1){
-    for(int i=startX; i<=endX; i++){
-      imageRegions->at<cv::Vec3b>(startX,endX) = green;
-    }
-  }
-  else if (regionType=2){
-    for(int i=startX; i<=endX; i++){
-      imageRegions->at<cv::Vec3b>(startX,endX) = white;
-    }
-  }
-  else if (regionType=3){
-    for(int i=startX; i<=endX; i++){
-      imageRegions->at<cv::Vec3b>(startX,endX) = red;
-    }
-  }
+
+  //if(regionType==1){
+    //cout << "startx: " << bla << "\t" << "endx: " << bla2 << endl;
+   for(int i=startX; i<endX; i++){
+cout << startX << endl;
+//     cout << i << "," << column << endl;
+//     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
+    // imageRegions->at<cv::Vec3b>(i,column) = green;
+   }
+  //}
+//  else if (regionType==2){
+//    cout << "no sir" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      //imageRegions->at<cv::Vec3b>(i,column) = white;
+//    }
+//  }
+//  else if (regionType==3){
+//    cout << "no sir 2" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      //imageRegions->at<cv::Vec3b>(i,column) = red;
+//    }
+//  }
 }
 
 void classifyRegions(cv::Mat *image, cv::Mat *imageRegions, std::vector<cv::Vec2i> *edgePointer){
   int current_column = 0;
-  int previous_column = 0;
+  int next_column = 0;
   int current_x = 0;
   int next_x = 0;
   int diff = 0;
@@ -226,27 +221,24 @@ void classifyRegions(cv::Mat *image, cv::Mat *imageRegions, std::vector<cv::Vec2
   //  cv::Vec2i test2 = (*edgePointer)[0];
   //  int test3 = (*edgePointer)[0][1];
   //  cout << test3 << endl;
-  for (int i=0; i<edgePointer->size(); i++){
-    if((*edgePointer)[i][1]==current_column){
-      //later on this is to optimize
-      //do not save current and previous x temporally
-      //current_column = edgePointer[i][1];
-      current_x = (*edgePointer)[i][0];
-      next_x = (*edgePointer)[i+1][0];
+  for (int i=0; i<edgePointer->size()-1; i++){
+    //later on this is to optimize
+    //do not save current and previous x temporally
+    //current_column = edgePointer[i][1];
+    current_x = (*edgePointer)[i][0];
+    next_x = (*edgePointer)[i+1][0];
+    current_column = (*edgePointer)[i][1];
+    next_column = (*edgePointer)[i+1][1];
+    if((next_column-current_column)==0){
       diff = next_x-current_x;
       gap = diff/6; //TODO: magic number
-
-
       median_Y = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[0],image->at<cv::Vec3b>(i+2*gap,current_column)[0],image->at<cv::Vec3b>(i+3*gap,current_column)[0],image->at<cv::Vec3b>(i+4*gap,current_column)[0],image->at<cv::Vec3b>(i+5*gap,current_column)[0]);
       median_Cb = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[1],image->at<cv::Vec3b>(i+2*gap,current_column)[1],image->at<cv::Vec3b>(i+3*gap,current_column)[1],image->at<cv::Vec3b>(i+4*gap,current_column)[1],image->at<cv::Vec3b>(i+5*gap,current_column)[1]);
       median_Cr = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[2],image->at<cv::Vec3b>(i+2*gap,current_column)[2],image->at<cv::Vec3b>(i+3*gap,current_column)[2],image->at<cv::Vec3b>(i+4*gap,current_column)[2],image->at<cv::Vec3b>(i+5*gap,current_column)[2]);
-      cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
+      //cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
-        setRegion(imageRegions, current_x, next_x, current_column, 1);
+        setRegion(imageRegions, 5, 7, current_column, 1);
       }
-    }
-    else { //next column
-
     }
   }
 }
@@ -281,12 +273,9 @@ int main()
   //  int test = edgePointer[0][1];
   //  cout << test << endl;
 
-  //  cout << edgePointer[1] << endl;
-  //  cout << edgePointer[2] << endl;
-  //  cout << edgePointer[3] << endl;
-  //  cout << edgePointer[4] << endl;
-
-
+//  for(int i=0; i<18; i++){
+//    cout << edgePointer[i] << endl;
+//  }
   //  cout << edgePointer.size() << endl;
   //  for (int i=0; i<edgePointer.size(); i++){
   //    cout << *edgePointer[i] << endl;
