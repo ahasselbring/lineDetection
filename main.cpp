@@ -174,7 +174,9 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
 void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
   for (int column=0;column<image.size().width; column+=2){
+    edgePointer.push_back(cv::Vec2i(0,column));
     edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
+    edgePointer.push_back(cv::Vec2i(image.size().height,column));
   }
 }
 
@@ -257,6 +259,7 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
         setRegion(imageRegions, current_x, next_x, current_column, 1); //TDO magic snort snort
       }
     }
+
   }
 }
 
