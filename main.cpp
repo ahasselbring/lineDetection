@@ -173,7 +173,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
 
 void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
-  for (int column=0;column<image.size().width; column+=2){
+  for (int column=0;column<image.size().width; column+=1){ //SCANLINE SUBSAMPLING +=2
     edgePointer.push_back(cv::Vec2i(0,column));
     edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
     edgePointer.push_back(cv::Vec2i(image.size().height,column));
@@ -243,10 +243,10 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
     //later on this is to optimize
     //do not save current and previous x temporally
     //current_column = edgePointer[i][1];
-    current_x = (edgePointer)[i][0];
-    next_x = (edgePointer)[i+1][0];
-    current_column = (edgePointer)[i][1];
-    next_column = (edgePointer)[i+1][1];
+    current_x = edgePointer[i][0];
+    next_x = edgePointer[i+1][0];
+    current_column = edgePointer[i][1];
+    next_column = edgePointer[i+1][1];
     if((next_column-current_column)==0){
       diff = next_x-current_x;
       gap = diff/6; //TODO: magic number
@@ -256,10 +256,9 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
       //cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
         //cout << current_x << "," << next_x << "," << current_column << "," << next_column << endl;
-        setRegion(imageRegions, current_x, next_x, current_column, 1); //TDO magic snort snort
+        setRegion(imageRegions, current_x, next_x, current_column, 1); //TODO magic snort snort
       }
     }
-
   }
 }
 
