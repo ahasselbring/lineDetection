@@ -93,7 +93,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
   color[1] = 255;
   color[2] = 255;
 
-  std::vector<char> edge;
+  //std::vector<char> edge;
 
   //  vector<cv::Vec3b*> edgePointer;
 
@@ -140,7 +140,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
     g = fx - fx_last;
     if(g > g_max) {
       if(g_min < (-t_edge)) {
-        edge.push_back(x_peak);
+        //edge.push_back(x_peak);
         //edges.push_back(imageEdges->at<cv::Vec3b>(x_peak,column));
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //edgePointer->push_back(new cv::Vec2i(x_peak, column));
@@ -156,7 +156,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
 
     if(g < g_min) {
       if(g_max > t_edge) {
-        edge.push_back(x_peak);
+        //edge.push_back(x_peak);
         imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         edgePointer.push_back(cv::Vec2i(x_peak,column));
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
