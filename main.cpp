@@ -86,7 +86,7 @@ bool fieldCheck(int Y, int Cb, int Cr) {
 //  }
 //}
 
-void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge, std::vector<cv::Vec2i> *edgePointer){
+void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer){
 
   cv::Vec3b color;
   color[0] = 255;
@@ -121,7 +121,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
   //  int test[0];
   //  edges.push_back(test);
 
-  int SCANLINE_SIZE = image->size().height;
+  int SCANLINE_SIZE = image.size().height;
   int scanline[SCANLINE_SIZE];
 
   int g_max = -t_edge;
@@ -132,7 +132,7 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
   int g = 0;
 
   for (int x=0; x<SCANLINE_SIZE; x++) {
-    scanline[x] = (image->at<cv::Vec3b>(x,column))[0];
+    scanline[x] = (image.at<cv::Vec3b>(x,column))[0];
   }
 
   for(int x = 2; x < SCANLINE_SIZE; x=x+2) {
@@ -144,8 +144,8 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
         //edges.push_back(imageEdges->at<cv::Vec3b>(x_peak,column));
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //edgePointer->push_back(new cv::Vec2i(x_peak, column));
-        edgePointer->push_back(cv::Vec2i(x_peak,column));
-        imageEdges->at<cv::Vec3b>(x_peak,column) = color;
+        edgePointer.push_back(cv::Vec2i(x_peak,column));
+        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
       }
@@ -157,8 +157,8 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
     if(g < g_min) {
       if(g_max > t_edge) {
         edge.push_back(x_peak);
-        imageEdges->at<cv::Vec3b>(x_peak,column) = color;
-        edgePointer->push_back(cv::Vec2i(x_peak,column));
+        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
+        edgePointer.push_back(cv::Vec2i(x_peak,column));
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
@@ -171,14 +171,14 @@ void edgeDetectionOnScanline(int column, cv::Mat *image,cv::Mat *imageEdges, cv:
   }
 }
 
-void edgeDetection(cv::Mat *image, cv::Mat *imageEdges, cv::Mat *imageLines, int t_edge, std::vector<cv::Vec2i> *edgePointer) {
+void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
-  for (int column=0;column<image->size().width; column+=2){
+  for (int column=0;column<image.size().width; column+=2){
     edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
   }
 }
 
-void setRegion(cv::Mat *imageRegions, const int *startX, const int *endX, const int *column, int regionType){
+void setRegion(cv::Mat &imageRegions, const int startX, const int endX, const int column, const int regionType){
   //regionType
   //1-field
   //2-line
@@ -197,14 +197,17 @@ void setRegion(cv::Mat *imageRegions, const int *startX, const int *endX, const 
   red[1] = 0;
   red[2] = 0;
 
-  //if(regionType==1){
-  //cout << "startx: " << bla << "\t" << "endx: " << bla2 << endl;
-  for(int i=*startX; i<*endX; i++){
-  //out << *startX << endl;
-  //     cout << i << "," << column << endl;
-  //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
-    imageRegions->at<cv::Vec3b>(i,*column) = green;
+  if(regionType==1){
+
+    for(int i=startX; i<endX; i++){
+      //out << *startX << endl;
+      //     cout << i << "," << column << endl;
+      //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
+      imageRegions.at<cv::Vec3b>(i, column) = green;
+    }
   }
+
+  //cout << "startx: " << startX << "\t" << "endx: " << endX << endl;
   //}
   //  else if (regionType==2){
   //    cout << "no sir" << endl;
@@ -220,7 +223,7 @@ void setRegion(cv::Mat *imageRegions, const int *startX, const int *endX, const 
   //  }
 }
 
-void classifyRegions(cv::Mat *image, cv::Mat *imageRegions, std::vector<cv::Vec2i> *edgePointer){
+void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2i> &edgePointer){
   int current_column = 0;
   int next_column = 0;
   int current_x = 0;
@@ -234,24 +237,24 @@ void classifyRegions(cv::Mat *image, cv::Mat *imageRegions, std::vector<cv::Vec2
   //  cv::Vec2i test2 = (*edgePointer)[0];
   //  int test3 = (*edgePointer)[0][1];
   //  cout << test3 << endl;
-  for (int i=0; i<edgePointer->size()-1; i++){
+  for (unsigned int i=0; i<edgePointer.size()-1; i++){
     //later on this is to optimize
     //do not save current and previous x temporally
     //current_column = edgePointer[i][1];
-    current_x = (*edgePointer)[i][0];
-    next_x = (*edgePointer)[i+1][0];
-    current_column = (*edgePointer)[i][1];
-    next_column = (*edgePointer)[i+1][1];
+    current_x = (edgePointer)[i][0];
+    next_x = (edgePointer)[i+1][0];
+    current_column = (edgePointer)[i][1];
+    next_column = (edgePointer)[i+1][1];
     if((next_column-current_column)==0){
       diff = next_x-current_x;
       gap = diff/6; //TODO: magic number
-      median_Y = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[0],image->at<cv::Vec3b>(i+2*gap,current_column)[0],image->at<cv::Vec3b>(i+3*gap,current_column)[0],image->at<cv::Vec3b>(i+4*gap,current_column)[0],image->at<cv::Vec3b>(i+5*gap,current_column)[0]);
-      median_Cb = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[1],image->at<cv::Vec3b>(i+2*gap,current_column)[1],image->at<cv::Vec3b>(i+3*gap,current_column)[1],image->at<cv::Vec3b>(i+4*gap,current_column)[1],image->at<cv::Vec3b>(i+5*gap,current_column)[1]);
-      median_Cr = medianOfFive(image->at<cv::Vec3b>(i+1*gap,current_column)[2],image->at<cv::Vec3b>(i+2*gap,current_column)[2],image->at<cv::Vec3b>(i+3*gap,current_column)[2],image->at<cv::Vec3b>(i+4*gap,current_column)[2],image->at<cv::Vec3b>(i+5*gap,current_column)[2]);
+      median_Y = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[0],image.at<cv::Vec3b>(current_x+2*gap,current_column)[0],image.at<cv::Vec3b>(current_x+3*gap,current_column)[0],image.at<cv::Vec3b>(current_x+4*gap,current_column)[0],image.at<cv::Vec3b>(current_x+5*gap,current_column)[0]);
+      median_Cb = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[1],image.at<cv::Vec3b>(current_x+2*gap,current_column)[1],image.at<cv::Vec3b>(current_x+3*gap,current_column)[1],image.at<cv::Vec3b>(current_x+4*gap,current_column)[1],image.at<cv::Vec3b>(current_x+5*gap,current_column)[1]);
+      median_Cr = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[2],image.at<cv::Vec3b>(current_x+2*gap,current_column)[2],image.at<cv::Vec3b>(current_x+3*gap,current_column)[2],image.at<cv::Vec3b>(current_x+4*gap,current_column)[2],image.at<cv::Vec3b>(current_x+5*gap,current_column)[2]);
       //cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
         //cout << current_x << "," << next_x << "," << current_column << "," << next_column << endl;
-        setRegion(imageRegions, &current_x, &next_x, &current_column, 1);
+        setRegion(imageRegions, current_x, next_x, current_column, 1); //TDO magic snort snort
       }
     }
   }
@@ -278,10 +281,10 @@ int main()
   std::chrono::duration<float, std::ratio<1, 1000>> delta;
 
   chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
-  edgeDetection(&image, &imageEdges, &imageLines, t_edge, &edgePointer);
+  edgeDetection(image, imageEdges, imageLines, t_edge, edgePointer);
   delta = chrono::system_clock::now() - startTime;
 
-  classifyRegions(&image, &imageRegions, &edgePointer);
+  classifyRegions(image, imageRegions, edgePointer);
 
   //  cout << "Size: " << edgePointer.size() << endl;
   //  cout << edgePointer[0][1] << endl;
