@@ -316,7 +316,20 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
     }
   }
 
+for(int i = 0; i < unknownRegions.size(); i++) {
 
+  if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
+    if( image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
+      if(image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
+
+        lineRegions.push_back(unknownRegions[i]);
+
+      }
+    }
+  }
+
+
+}
 
 }
 
