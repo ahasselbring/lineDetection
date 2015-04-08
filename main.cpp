@@ -90,7 +90,7 @@ bool lineCheck(){
 //  }
 //}
 
-void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer){
+void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer){
 
   cv::Vec3b color;
   color[0] = 255;
@@ -149,7 +149,8 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //edgePointer->push_back(new cv::Vec2i(x_peak, column));
         edgePointer.push_back(cv::Vec2i(x_peak,column));
-        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
+        //draw edges
+        //imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
       }
@@ -161,8 +162,9 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
     if(g < g_min) {
       if(g_max > t_edge) {
         //edge.push_back(x_peak);
-        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         edgePointer.push_back(cv::Vec2i(x_peak,column));
+        //draw edges
+        //imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
@@ -175,61 +177,61 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
   }
 }
 
-void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
+void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
   for (int column=0;column<image.size().width; column+=1){ //SCANLINE SUBSAMPLING +=2
     edgePointer.push_back(cv::Vec2i(0,column));
-    edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
+    edgeDetectionOnScanline(column, image, imageEdges, t_edge, edgePointer);
     edgePointer.push_back(cv::Vec2i(image.size().height,column));
   }
 }
 
-void setRegion(cv::Mat &imageRegions, const int startX, const int endX, const int column, const int regionType){
-  //regionType
-  //1-field
-  //2-line
-  //3-unknown
+//void setRegion(cv::Mat &imageRegions, const int startX, const int endX, const int column, const int regionType){
+//  //regionType
+//  //1-field
+//  //2-line
+//  //3-unknown
 
-  cv::Vec3b green;
-  green[0] = 0; //B
-  green[1] = 255; //G
-  green[2] = 0; //R
-  cv::Vec3b white;
-  white[0] = 255;
-  white[1] = 255;
-  white[2] = 255;
-  cv::Vec3b red;
-  red[0] = 0;
-  red[1] = 0;
-  red[2] = 255;
+//  cv::Vec3b green;
+//  green[0] = 0; //B
+//  green[1] = 255; //G
+//  green[2] = 0; //R
+//  cv::Vec3b white;
+//  white[0] = 255;
+//  white[1] = 255;
+//  white[2] = 255;
+//  cv::Vec3b red;
+//  red[0] = 0;
+//  red[1] = 0;
+//  red[2] = 255;
 
-  if(regionType==1){
+//  if(regionType==1){
 
-    for(int i=startX; i<endX; i++){
-      //out << *startX << endl;
-      //     cout << i << "," << column << endl;
-      //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
-      imageRegions.at<cv::Vec3b>(i, column) = green;
-    }
-  }
+//    for(int i=startX; i<endX; i++){
+//      //out << *startX << endl;
+//      //     cout << i << "," << column << endl;
+//      //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
+//      imageRegions.at<cv::Vec3b>(i, column) = green;
+//    }
+//  }
 
-  //cout << "startx: " << startX << "\t" << "endx: " << endX << endl;
-  else if (regionType==2){
-    //cout << "no sir" << endl;
-    for(int i=startX; i<=endX; i++){
-      imageRegions.at<cv::Vec3b>(i,column) = white;
-    }
-  }
-  else if(regionType==3){
-    //cout << "no sir 2" << endl;
-    for(int i=startX; i<=endX; i++){
-      imageRegions.at<cv::Vec3b>(i,column) = red;
-    }
-  }
-  else {
-    cout << "Das sollte niemals vorkommen" << endl;
-  }
-}
+//  //cout << "startx: " << startX << "\t" << "endx: " << endX << endl;
+//  else if (regionType==2){
+//    //cout << "no sir" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      imageRegions.at<cv::Vec3b>(i,column) = white;
+//    }
+//  }
+//  else if(regionType==3){
+//    //cout << "no sir 2" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      imageRegions.at<cv::Vec3b>(i,column) = red;
+//    }
+//  }
+//  else {
+//    cout << "Das sollte niemals vorkommen" << endl;
+//  }
+//}
 
 void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2i> &edgePointer, std::vector<cv::Vec4i> &fieldRegions, std::vector<cv::Vec4i> &lineRegions, std::vector<cv::Vec4i> &unknownRegions){
   int currentColumn = 0;
@@ -313,10 +315,6 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
       }
     }
   }
-
-  cout << fieldRegions.size() << endl;
-  cout << unknownRegions.size() << endl;
-
 }
 
 void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<cv::Vec4i> &lineRegions, vector<cv::Vec4i> &unknownRegions){
@@ -380,15 +378,17 @@ int main()
 
   int t_edge;
   t_edge = 8;
-  std::chrono::duration<float, std::ratio<1, 1000>> delta;
+  std::chrono::duration<float, std::ratio<1, 1000>> delta1;
+  std::chrono::duration<float, std::ratio<1, 1000>> delta2;
 
   chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
-  edgeDetection(image, imageEdges, imageLines, t_edge, edgePointer);
-  delta = chrono::system_clock::now() - startTime;
-  cout << edgePointer.size() << endl;
+  edgeDetection(image, imageEdges, t_edge, edgePointer);
+  delta1 = chrono::system_clock::now() - startTime;
   classifyRegions(image, imageRegions, edgePointer, fieldRegions, lineRegions, unknownRegions);
+  delta2 = chrono::system_clock::now() - startTime;
   drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions);
 
+  //cout << edgePointer.size() << endl;
   //  cout << "Size: " << edgePointer.size() << endl;
   //  cout << edgePointer[0][1] << endl;
   //  int test = edgePointer[0][1];
@@ -402,8 +402,13 @@ int main()
   //    cout << *edgePointer[i] << endl;
   //  }
 
-  printf("%f",delta.count());
-  cv::imwrite ("result_edges.png",imageEdges, vector<int>());
+  cout << "fieldRegions: " << fieldRegions.size() << endl;
+  cout << "unknownRegions: " << unknownRegions.size() << endl;
+
+  printf("edgeDetection: %fms\n",delta1.count());
+  printf("classifyRegions: %fms\n",delta2.count());
+  printf("sum: %fms\n",delta1.count()+delta2.count());
+  //cv::imwrite ("result_edges.png",imageEdges, vector<int>());
   cv::imwrite ("result_regions.png",imageRegions, vector<int>());
   cv::imwrite ("result_lines.png",imageLines, vector<int>());
 
