@@ -243,9 +243,9 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
   int median_Y = 0;
   int median_Cb = 0;
   int median_Cr = 0;
-  int currentRegion = 0; //0 - default, 1 - field, 2 - line, 3 - unknown
-  int startRegion = 0;
-  int endRegion = 0;
+//  int currentRegion = 0; //0 - default, 1 - field, 2 - line, 3 - unknown
+//  int startRegion = 0;
+//  int endRegion = 0;
   //  std::vector<cv::Vec2i> test = *edgePointer;
   //  cv::Vec2i test2 = (*edgePointer)[0];
   //  int test3 = (*edgePointer)[0][1];
@@ -277,8 +277,8 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
         //        endRegion = nextX;
         //update the last vector to connect contiguous regions to hold the vector small
         if(fieldRegions.size()>0){
-          if(fieldRegions[fieldRegions.size()-1][3] == currentX && fieldRegions[fieldRegions.size()-1][3]==currentColumn) {
-            fieldRegions[fieldRegions.size()-1][3] = nextX;
+          if(fieldRegions[fieldRegions.size()-1][2] == currentX && fieldRegions[fieldRegions.size()-1][3] == currentColumn) {
+            fieldRegions[fieldRegions.size()-1][2] = nextX;
             //cout << "updated field" << endl;
           }
           else {
@@ -297,8 +297,8 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
       //      }
       else{
         if(unknownRegions.size()>0){
-          if(unknownRegions[unknownRegions.size()-1][3] == currentX && unknownRegions[unknownRegions.size()-1][3]==currentColumn) {
-            unknownRegions[unknownRegions.size()-1][3] = nextX;
+          if(unknownRegions[unknownRegions.size()-1][2] == currentX && unknownRegions[unknownRegions.size()-1][3] == currentColumn) {
+            unknownRegions[unknownRegions.size()-1][2] = nextX;
             //cout << "updated unknown" << endl;
           }
           else {
@@ -315,6 +315,9 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
       }
     }
   }
+
+
+
 }
 
 void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<cv::Vec4i> &lineRegions, vector<cv::Vec4i> &unknownRegions){
