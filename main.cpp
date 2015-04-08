@@ -14,6 +14,7 @@
 #define T_Y 62
 #define T_CB 19
 #define T_CR 12
+#define Y_THRESHOLD 30  //TODO: to be optimized
 
 using namespace std;
 
@@ -179,7 +180,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, int
 
 void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
-  for (int column=0;column<image.size().width; column+=1){ //SCANLINE SUBSAMPLING +=2
+  for (int column=0;column<image.size().width; column+=2){ //SCANLINE SUBSAMPLING +=2
     edgePointer.push_back(cv::Vec2i(0,column));
     edgeDetectionOnScanline(column, image, imageEdges, t_edge, edgePointer);
     edgePointer.push_back(cv::Vec2i(image.size().height,column));
@@ -319,8 +320,8 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
 for(int i = 0; i < unknownRegions.size(); i++) {
 
   if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
-    if( image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
-      if(image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
+    if( (image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
+      if( (image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
 
         lineRegions.push_back(unknownRegions[i]);
 
