@@ -275,7 +275,7 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
         //        endRegion = nextX;
         //update the last vector to connect contiguous regions to hold the vector small
         if(fieldRegions.size()>0){
-          if(fieldRegions[fieldRegions.size()-1][3] = currentX && fieldRegions[fieldRegions.size()-1][3]==currentColumn) {
+          if(fieldRegions[fieldRegions.size()-1][3] == currentX && fieldRegions[fieldRegions.size()-1][3]==currentColumn) {
             fieldRegions[fieldRegions.size()-1][3] = nextX;
             //cout << "updated field" << endl;
           }
@@ -295,7 +295,7 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
       //      }
       else{
         if(unknownRegions.size()>0){
-          if(unknownRegions[unknownRegions.size()-1][3] = currentX && unknownRegions[unknownRegions.size()-1][3]==currentColumn) {
+          if(unknownRegions[unknownRegions.size()-1][3] == currentX && unknownRegions[unknownRegions.size()-1][3]==currentColumn) {
             unknownRegions[unknownRegions.size()-1][3] = nextX;
             //cout << "updated unknown" << endl;
           }
