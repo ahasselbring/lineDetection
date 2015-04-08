@@ -72,6 +72,10 @@ bool fieldCheck(int Y, int Cb, int Cr) {
   return false;
 }
 
+bool lineCheck(){
+
+}
+
 //void classifyEdges(cv::Mat *image, cv::Mat *imageLines, int x, int column){
 //  if(checkForLine(median(image, x, column, 0),median(image, x, column, 1),median(image, x, column, 2))) {
 //    //x,column ist eine weiße linie auf dem spielfeld.
@@ -86,7 +90,7 @@ bool fieldCheck(int Y, int Cb, int Cr) {
 //  }
 //}
 
-void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer){
+void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer){
 
   cv::Vec3b color;
   color[0] = 255;
@@ -145,7 +149,8 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //edgePointer->push_back(new cv::Vec2i(x_peak, column));
         edgePointer.push_back(cv::Vec2i(x_peak,column));
-        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
+        //draw edges
+        //imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
       }
@@ -157,8 +162,9 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
     if(g < g_min) {
       if(g_max > t_edge) {
         //edge.push_back(x_peak);
-        imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         edgePointer.push_back(cv::Vec2i(x_peak,column));
+        //draw edges
+        //imageEdges.at<cv::Vec3b>(x_peak,column) = color;
         //edgePointer->push_back(&(imageEdges->at<cv::Vec3b>(x_peak,column)));
         //Methode von Erik und Pascal. Klappt aber nicht.
         //classifyEdges(image, imageLines, x_peak,column);
@@ -171,70 +177,75 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, cv:
   }
 }
 
-void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, cv::Mat &imageLines, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
+void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
   for (int column=0;column<image.size().width; column+=1){ //SCANLINE SUBSAMPLING +=2
     edgePointer.push_back(cv::Vec2i(0,column));
-    edgeDetectionOnScanline(column, image, imageEdges, imageLines, t_edge, edgePointer);
+    edgeDetectionOnScanline(column, image, imageEdges, t_edge, edgePointer);
     edgePointer.push_back(cv::Vec2i(image.size().height,column));
   }
 }
 
-void setRegion(cv::Mat &imageRegions, const int startX, const int endX, const int column, const int regionType){
-  //regionType
-  //1-field
-  //2-line
-  //3-unknown
+//void setRegion(cv::Mat &imageRegions, const int startX, const int endX, const int column, const int regionType){
+//  //regionType
+//  //1-field
+//  //2-line
+//  //3-unknown
 
-  cv::Vec3b green;
-  green[0] = 0;
-  green[1] = 255;
-  green[2] = 0;
-  cv::Vec3b white;
-  white[0] = 255;
-  white[1] = 255;
-  white[2] = 255;
-  cv::Vec3b red;
-  red[0] = 255;
-  red[1] = 0;
-  red[2] = 0;
+//  cv::Vec3b green;
+//  green[0] = 0; //B
+//  green[1] = 255; //G
+//  green[2] = 0; //R
+//  cv::Vec3b white;
+//  white[0] = 255;
+//  white[1] = 255;
+//  white[2] = 255;
+//  cv::Vec3b red;
+//  red[0] = 0;
+//  red[1] = 0;
+//  red[2] = 255;
 
-  if(regionType==1){
+//  if(regionType==1){
 
-    for(int i=startX; i<endX; i++){
-      //out << *startX << endl;
-      //     cout << i << "," << column << endl;
-      //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
-      imageRegions.at<cv::Vec3b>(i, column) = green;
-    }
-  }
+//    for(int i=startX; i<endX; i++){
+//      //out << *startX << endl;
+//      //     cout << i << "," << column << endl;
+//      //     cout << imageRegions->size().width << "," << imageRegions->size().height << endl;
+//      imageRegions.at<cv::Vec3b>(i, column) = green;
+//    }
+//  }
 
-  //cout << "startx: " << startX << "\t" << "endx: " << endX << endl;
-  //}
-  //  else if (regionType==2){
-  //    cout << "no sir" << endl;
-  //    for(int i=startX; i<=endX; i++){
-  //      //imageRegions->at<cv::Vec3b>(i,column) = white;
-  //    }
-  //  }
-  //  else if (regionType==3){
-  //    cout << "no sir 2" << endl;
-  //    for(int i=startX; i<=endX; i++){
-  //      //imageRegions->at<cv::Vec3b>(i,column) = red;
-  //    }
-  //  }
-}
+//  //cout << "startx: " << startX << "\t" << "endx: " << endX << endl;
+//  else if (regionType==2){
+//    //cout << "no sir" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      imageRegions.at<cv::Vec3b>(i,column) = white;
+//    }
+//  }
+//  else if(regionType==3){
+//    //cout << "no sir 2" << endl;
+//    for(int i=startX; i<=endX; i++){
+//      imageRegions.at<cv::Vec3b>(i,column) = red;
+//    }
+//  }
+//  else {
+//    cout << "Das sollte niemals vorkommen" << endl;
+//  }
+//}
 
-void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2i> &edgePointer){
-  int current_column = 0;
-  int next_column = 0;
-  int current_x = 0;
-  int next_x = 0;
+void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2i> &edgePointer, std::vector<cv::Vec4i> &fieldRegions, std::vector<cv::Vec4i> &lineRegions, std::vector<cv::Vec4i> &unknownRegions){
+  int currentColumn = 0;
+  int nextColumn = 0;
+  int currentX = 0;
+  int nextX = 0;
   int diff = 0;
   int gap = 0;
   int median_Y = 0;
   int median_Cb = 0;
   int median_Cr = 0;
+  int currentRegion = 0; //0 - default, 1 - field, 2 - line, 3 - unknown
+  int startRegion = 0;
+  int endRegion = 0;
   //  std::vector<cv::Vec2i> test = *edgePointer;
   //  cv::Vec2i test2 = (*edgePointer)[0];
   //  int test3 = (*edgePointer)[0][1];
@@ -243,21 +254,105 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
     //later on this is to optimize
     //do not save current and previous x temporally
     //current_column = edgePointer[i][1];
-    current_x = edgePointer[i][0];
-    next_x = edgePointer[i+1][0];
-    current_column = edgePointer[i][1];
-    next_column = edgePointer[i+1][1];
-    if((next_column-current_column)==0){
-      diff = next_x-current_x;
+    currentX = edgePointer[i][0];
+    nextX = edgePointer[i+1][0];
+    currentColumn = edgePointer[i][1];
+    nextColumn = edgePointer[i+1][1];
+    if((nextColumn-currentColumn)==0){
+      diff = nextX-currentX;
       gap = diff/6; //TODO: magic number
-      median_Y = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[0],image.at<cv::Vec3b>(current_x+2*gap,current_column)[0],image.at<cv::Vec3b>(current_x+3*gap,current_column)[0],image.at<cv::Vec3b>(current_x+4*gap,current_column)[0],image.at<cv::Vec3b>(current_x+5*gap,current_column)[0]);
-      median_Cb = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[1],image.at<cv::Vec3b>(current_x+2*gap,current_column)[1],image.at<cv::Vec3b>(current_x+3*gap,current_column)[1],image.at<cv::Vec3b>(current_x+4*gap,current_column)[1],image.at<cv::Vec3b>(current_x+5*gap,current_column)[1]);
-      median_Cr = medianOfFive(image.at<cv::Vec3b>(current_x+1*gap,current_column)[2],image.at<cv::Vec3b>(current_x+2*gap,current_column)[2],image.at<cv::Vec3b>(current_x+3*gap,current_column)[2],image.at<cv::Vec3b>(current_x+4*gap,current_column)[2],image.at<cv::Vec3b>(current_x+5*gap,current_column)[2]);
+      median_Y = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[0]);
+      median_Cb = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[1]);
+      median_Cr = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[2]);
       //cout << median_Y << "," << median_Cb << "," << median_Cr << endl;
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
         //cout << current_x << "," << next_x << "," << current_column << "," << next_column << endl;
-        setRegion(imageRegions, current_x, next_x, current_column, 1); //TODO magic snort snort
+        //        if(currentRegion == 0){
+        //          currentRegion = 1;
+        //        }
+        //        else if(currentRegion == )
+        //        if (startRegion>currentX){
+        //          startRegion = currentX;
+        //        }
+        //        endRegion = nextX;
+        //update the last vector to connect contiguous regions to hold the vector small
+        if(fieldRegions.size()>0){
+          if(fieldRegions[fieldRegions.size()-1][3] == currentX && fieldRegions[fieldRegions.size()-1][3]==currentColumn) {
+            fieldRegions[fieldRegions.size()-1][3] = nextX;
+            //cout << "updated field" << endl;
+          }
+          else {
+            fieldRegions.push_back(cv::Vec4i(currentX,currentColumn, nextX, currentColumn));
+          }
+        }
+        else{
+          //first entry of current column
+          fieldRegions.push_back(cv::Vec4i(currentX,currentColumn, nextX, currentColumn));
+        }
+        //paint
+        //setRegion(imageRegions, currentX, nextX, currentColumn, 1); //TODO magic snort snort
       }
+      //      else if(lineCheck()){
+      //        setRegion(imageRegions, currentX, nextX, currentColumn, 2);
+      //      }
+      else{
+        if(unknownRegions.size()>0){
+          if(unknownRegions[unknownRegions.size()-1][3] == currentX && unknownRegions[unknownRegions.size()-1][3]==currentColumn) {
+            unknownRegions[unknownRegions.size()-1][3] = nextX;
+            //cout << "updated unknown" << endl;
+          }
+          else {
+            unknownRegions.push_back(cv::Vec4i(currentX,currentColumn, nextX, currentColumn));
+          }
+        }
+        else{
+          //first entry of current column
+          unknownRegions.push_back(cv::Vec4i(currentX,currentColumn, nextX, currentColumn));
+        }
+        //unknownRegions.push_back(cv::Vec4i(currentX,currentColumn, nextX, currentColumn));
+        //paint
+        //setRegion(imageRegions, currentX, nextX, currentColumn, 3);
+      }
+    }
+  }
+}
+
+void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<cv::Vec4i> &lineRegions, vector<cv::Vec4i> &unknownRegions){
+  cv::Vec3b green;
+  green[0] = 0; //B
+  green[1] = 255; //G
+  green[2] = 0; //R
+  cv::Vec3b white;
+  white[0] = 255;
+  white[1] = 255;
+  white[2] = 255;
+  cv::Vec3b red;
+  red[0] = 0;
+  red[1] = 0;
+  red[2] = 255;
+
+  for(int i=0; i<unknownRegions.size(); i++){
+    int startX = unknownRegions[i][0];
+    int endX = unknownRegions[i][2];
+    int column = unknownRegions[i][1];
+    for(int k=startX; k<=endX; k++){
+      imageRegions.at<cv::Vec3b>(k,column) = red;
+    }
+  }
+  for(int i=0; i<fieldRegions.size(); i++){
+    int startX = fieldRegions[i][0];
+    int endX = fieldRegions[i][2];
+    int column = fieldRegions[i][1];
+    for(int k=startX; k<=endX; k++){
+      imageRegions.at<cv::Vec3b>(k,column) = green;
+    }
+  }
+  for(int i=0; i<lineRegions.size(); i++){
+    int startX = lineRegions[i][0];
+    int endX = lineRegions[i][2];
+    int column = lineRegions[i][1];
+    for(int k=startX; k<=endX; k++){
+      imageRegions.at<cv::Vec3b>(k,column) = white;
     }
   }
 }
@@ -272,6 +367,9 @@ int main()
 
   //vector<cv::Vec3b*> edgePointer;
   vector<cv::Vec2i> edgePointer;
+  vector<cv::Vec4i> fieldRegions; //startX startY endX endY
+  vector<cv::Vec4i> lineRegions; //startX startY endX endY
+  vector<cv::Vec4i> unknownRegions; //startX startY endX endY
   //cv::Vec2i test(10,11);
   //edgePointer.push_back(test);
   //edgePointer.push_back(cv::Vec2i(8,9));
@@ -280,14 +378,17 @@ int main()
 
   int t_edge;
   t_edge = 8;
-  std::chrono::duration<float, std::ratio<1, 1000>> delta;
+  std::chrono::duration<float, std::ratio<1, 1000>> delta1;
+  std::chrono::duration<float, std::ratio<1, 1000>> delta2;
 
   chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
-  edgeDetection(image, imageEdges, imageLines, t_edge, edgePointer);
-  delta = chrono::system_clock::now() - startTime;
+  edgeDetection(image, imageEdges, t_edge, edgePointer);
+  delta1 = chrono::system_clock::now() - startTime;
+  classifyRegions(image, imageRegions, edgePointer, fieldRegions, lineRegions, unknownRegions);
+  delta2 = chrono::system_clock::now() - startTime;
+  drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions);
 
-  classifyRegions(image, imageRegions, edgePointer);
-
+  //cout << edgePointer.size() << endl;
   //  cout << "Size: " << edgePointer.size() << endl;
   //  cout << edgePointer[0][1] << endl;
   //  int test = edgePointer[0][1];
@@ -301,8 +402,13 @@ int main()
   //    cout << *edgePointer[i] << endl;
   //  }
 
-  printf("%f",delta.count());
-  cv::imwrite ("result_edges.png",imageEdges, vector<int>());
+  cout << "fieldRegions: " << fieldRegions.size() << endl;
+  cout << "unknownRegions: " << unknownRegions.size() << endl;
+
+  printf("edgeDetection: %fms\n",delta1.count());
+  printf("classifyRegions: %fms\n",delta2.count());
+  printf("sum: %fms\n",delta1.count()+delta2.count());
+  //cv::imwrite ("result_edges.png",imageEdges, vector<int>());
   cv::imwrite ("result_regions.png",imageRegions, vector<int>());
   cv::imwrite ("result_lines.png",imageLines, vector<int>());
 
