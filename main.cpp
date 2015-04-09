@@ -14,6 +14,7 @@
 #define T_Y 62
 #define T_CB 19
 #define T_CR 12
+#define Y_THRESHOLD 30  //TODO: to be optimized
 
 using namespace std;
 
@@ -179,7 +180,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, int
 
 void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edgePointer) {
   //+2 cause of downsampling
-  for (int column=0;column<image.size().width; column+=1){ //SCANLINE SUBSAMPLING +=2
+  for (int column=0;column<image.size().width; column+=2){ //SCANLINE SUBSAMPLING +=2
     edgePointer.push_back(cv::Vec2i(0,column));
     edgeDetectionOnScanline(column, image, imageEdges, t_edge, edgePointer);
     edgePointer.push_back(cv::Vec2i(image.size().height,column));
@@ -318,12 +319,10 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
 
   for(int i = 0; i < unknownRegions.size(); i++) {
 
-    if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
-      if( image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
-        if(image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
-
+  if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
+    if( (image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
+      if( (image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
           lineRegions.push_back(unknownRegions[i]);
-
         }
       }
     }
@@ -371,6 +370,49 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
       imageRegions.at<cv::Vec3b>(k,column) = white;
     }
   }
+}
+
+
+/**
+ * @brief calculateGradient
+ * This method uses a sobel operator to smooth and differentiate the picture in x direction
+ * @param image
+ * The image which should be processed
+ * @param lineRegions
+ * The candidate points from the edgeDetection
+ */
+void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec6i> gradientVector) {
+
+  /*Sobel operator:
+   *
+   * 1 0 -1
+   * 2 0 -2
+   * 1 0 -1
+   */
+
+
+  signed int upper_gradient = 0;
+  signed  int lower_gradient = 0;
+  int upper_x = 0;
+  int lower_x = 0;
+  int y = 0;
+  for(int i=0;i< lineRegions.size();i++) {
+    upper_x = lineRegions[i][0];
+    lower_x = lineRegions[i][2];
+    y = lineRegions[i][1];
+
+    upper_gradient = 1 * image.at<cv::Vec3b>(upper_x-1,y-1)[0] + 2 * image.at<cv::Vec3b>(upper_x,y-1)[0] + 1 * image.at<cv::Vec3b>(upper_x+1,y-1)[0] - 1 * image.at<cv::Vec3b>(upper_x+1,y+1)[0] - 2 * image.at<cv::Vec3b>(upper_x,y+1)[0] - 1 * image.at<cv::Vec3b>(upper_x+1,y+1)[0] ;
+    lower_gradient = 1 * image.at<cv::Vec3b>(lower_x-1,y-1)[0] + 2 * image.at<cv::Vec3b>(lower_x,y-1)[0] + 1 * image.at<cv::Vec3b>(lower_x+1,y-1)[0] - 1 * image.at<cv::Vec3b>(lower_x+1,y+1)[0] - 2 * image.at<cv::Vec3b>(lower_x,y+1)[0] - 1 * image.at<cv::Vec3b>(lower_x+1,y+1)[0] ;
+    gradientVector.push_back(cv::Vec6i(lineRegions[i][0],lineRegions[i][1],lineRegions[i][2],lineRegions[i][3],upper_gradient,lower_gradient )) ;
+  }
+
+  //TODO: Save the gradients in a practicable manner
+}
+
+double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
+
+
+
 }
 
 int main()
