@@ -234,11 +234,15 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
  */
 void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec8i> &gradientVector) {
 
-  /*Sobel operator:
+  /*Sobel operators:
    *
    * 1 0 -1
    * 2 0 -2
    * 1 0 -1
+   *
+   * 1 2 1
+   * 0 0 0
+   * -1 -2 -1
    */
 
   signed int upperXGradient = 0;
