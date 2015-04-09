@@ -374,6 +374,32 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   }
 }
 
+void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions) {
+
+  /*Sobel operator:
+   *
+   * 1 0 -1
+   * 2 0 -2
+   * 1 0 -1
+   */
+  int upper_gradient = 0;
+  int lower_gradient = 0;
+  int upper_x = 0;
+  int lower_x = 0;
+  int y = 0;
+  for(int i=0;i< lineRegions.size();i++) {
+    upper_x = lineRegions[i][0];
+    lower_x = lineRegions[i][2];
+    y = lineRegions[i][1];
+
+    upper_gradient = 1 * image.at<cv::Vec3b>(upper_x-1,y-1)[0] + 2 * image.at<cv::Vec3b>(upper_x,y-1)[0] + 1 * image.at<cv::Vec3b>(upper_x+1,y-1)[0] - 1 * image.at<cv::Vec3b>(upper_x+1,y+1)[0] - 2 * image.at<cv::Vec3b>(upper_x,y+1)[0] - 1 * image.at<cv::Vec3b>(upper_x+1,y+1)[0] ;
+    lower_gradient = 1 * image.at<cv::Vec3b>(lower_x-1,y-1)[0] + 2 * image.at<cv::Vec3b>(lower_x,y-1)[0] + 1 * image.at<cv::Vec3b>(lower_x+1,y-1)[0] - 1 * image.at<cv::Vec3b>(lower_x+1,y+1)[0] - 2 * image.at<cv::Vec3b>(lower_x,y+1)[0] - 1 * image.at<cv::Vec3b>(lower_x+1,y+1)[0] ;
+  }
+
+
+
+}
+
 int main()
 {
   cv::Mat image;
