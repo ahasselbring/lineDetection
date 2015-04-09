@@ -197,7 +197,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   red[1] = 0;
   red[2] = 255;
 
-  for(int i=0; i<unknownRegions.size(); i++){
+  for(signed int i=0; i<unknownRegions.size(); i++){
     int startX = unknownRegions[i][0];
     int endX = unknownRegions[i][2];
     int column = unknownRegions[i][1];
@@ -205,7 +205,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
       imageRegions.at<cv::Vec3b>(k,column) = red;
     }
   }
-  for(int i=0; i<fieldRegions.size(); i++){
+  for(signed int i=0; i<fieldRegions.size(); i++){
     int startX = fieldRegions[i][0];
     int endX = fieldRegions[i][2];
     int column = fieldRegions[i][1];
@@ -213,7 +213,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
       imageRegions.at<cv::Vec3b>(k,column) = green;
     }
   }
-  for(int i=0; i<lineRegions.size(); i++){
+  for(signed int i=0; i<lineRegions.size(); i++){
     int startX = lineRegions[i][0];
     int endX = lineRegions[i][2];
     int column = lineRegions[i][1];
@@ -232,7 +232,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
  * @param lineRegions
  * The candidate points from the edgeDetection
  */
-void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec6i> &gradientVector) {
+void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec8i> &gradientVector) {
 
   /*Sobel operator:
    *
@@ -242,20 +242,33 @@ void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegion
    */
 
   signed int upperXGradient = 0;
-  signed  int lowerXGradient = 0;
+  signed int lowerXGradient = 0;
+
   signed int upperYGradient = 0;
   signed int lowerYGradient = 0;
-  int upperX = 0;
-  int lowerX = 0;
-  int y = 0;
-  for(int i=0;i< lineRegions.size();i++) {
-    upperX = lineRegions[i][0];
-    lowerX = lineRegions[i][2];
-    y = lineRegions[i][1];
 
-    upperXGradient = 1 * image.at<cv::Vec3b>(upperX-1,y-1)[0] + 2 * image.at<cv::Vec3b>(upperX,y-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,y-1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,y+1)[0] - 2 * image.at<cv::Vec3b>(upperX,y+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,y+1)[0] ;
-    lowerXGradient = 1 * image.at<cv::Vec3b>(lowerX-1,y-1)[0] + 2 * image.at<cv::Vec3b>(lowerX,y-1)[0] + 1 * image.at<cv::Vec3b>(lowerX+1,y-1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,y+1)[0] - 2 * image.at<cv::Vec3b>(lowerX,y+1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,y+1)[0] ;
-    gradientVector.push_back(cv::Vec6i(lineRegions[i][0],lineRegions[i][1],lineRegions[i][2],lineRegions[i][3],upperXGradient,lowerXGradient )) ;
+
+  int upperX = 0;
+  int upperY = 0;
+
+  int lowerX = 0;
+  int lowerY = 0;
+
+  for(signed int i=0;i< lineRegions.size();i++) {
+
+    upperX = lineRegions[i][0];
+    upperY = lineRegions[i][1];
+
+    lowerX = lineRegions[i][2];
+    lowerY = lineRegions[i][3];
+
+    upperXGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX-1,upperY)[0] + 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 2 * image.at<cv::Vec3b>(upperX+1,upperY)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY+1)[0];
+    lowerXGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX-1,lowerY)[0] + 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX+1,lowerY)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0];
+
+    upperYGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX,upperY-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 2 * image.at<cv::Vec3b>(upperX,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperY+1,upperY+1)[0] ;
+    lowerYGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX,lowerY-1)[0] + 1 * image.at<cv::Vec3b>(lowerX+1,lowerY-1)[0] - 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerY+1,lowerY+1)[0] ;
+
+    gradientVector.push_back(cv::Vec8i(upperX,upperY,lowerX,lowerY,upperXGradient,lowerXGradient,upperYGradient,lowerYGradient)) ;
   }
 }
 
