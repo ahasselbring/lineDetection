@@ -243,9 +243,9 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
   int median_Y = 0;
   int median_Cb = 0;
   int median_Cr = 0;
-//  int currentRegion = 0; //0 - default, 1 - field, 2 - line, 3 - unknown
-//  int startRegion = 0;
-//  int endRegion = 0;
+  //  int currentRegion = 0; //0 - default, 1 - field, 2 - line, 3 - unknown
+  //  int startRegion = 0;
+  //  int endRegion = 0;
   //  std::vector<cv::Vec2i> test = *edgePointer;
   //  cv::Vec2i test2 = (*edgePointer)[0];
   //  int test3 = (*edgePointer)[0][1];
@@ -316,20 +316,20 @@ void classifyRegions(cv::Mat &image, cv::Mat &imageRegions, std::vector<cv::Vec2
     }
   }
 
-for(int i = 0; i < unknownRegions.size(); i++) {
+  for(int i = 0; i < unknownRegions.size(); i++) {
 
-  if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
-    if( image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
-      if(image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
+    if(unknownRegions[i][0] > 0 && unknownRegions[i][2] < image.size().height ) {
+      if( image.at<cv::Vec3b>(unknownRegions[i][0]-1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][0],unknownRegions[i][1])[0] ) {
+        if(image.at<cv::Vec3b>(unknownRegions[i][2]+1,unknownRegions[i][1])[0] < image.at<cv::Vec3b>( unknownRegions[i][2],unknownRegions[i][1])[0]) {
 
-        lineRegions.push_back(unknownRegions[i]);
+          lineRegions.push_back(unknownRegions[i]);
 
+        }
       }
     }
+
+
   }
-
-
-}
 
 }
 
