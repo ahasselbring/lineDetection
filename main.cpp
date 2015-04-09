@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <math.h>
 #include <chrono>
 #include <ctime>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
 #define DEBUG
+#define T_EDGE 8
 #define FIELD_Y 126
 #define FIELD_CB 114
 #define FIELD_CR 74
@@ -15,6 +17,7 @@
 #define T_CB 19
 #define T_CR 12
 #define Y_THRESHOLD 30  //TODO: to be optimized
+#define PI 3.14159265
 
 using namespace std;
 
@@ -183,7 +186,7 @@ void classifyRegions(cv::Mat &image, std::vector<cv::Vec2i> &edgePointer, std::v
   }
 }
 
-void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<cv::Vec4i> &lineRegions, vector<cv::Vec4i> &unknownRegions){
+void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<cv::Vec4i> &lineRegions, vector<cv::Vec4i> &unknownRegions, vector<cv::Vec8i> &gradientVector){
   cv::Vec3b green;
   green[0] = 0; //B
   green[1] = 255; //G
@@ -196,6 +199,10 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   red[0] = 0;
   red[1] = 0;
   red[2] = 255;
+  cv::Vec3b blue;
+  red[0] = 255;
+  red[1] = 0;
+  red[2] = 0;
 
   for(signed int i=0; i<unknownRegions.size(); i++){
     int startX = unknownRegions[i][0];
@@ -221,6 +228,10 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
       imageRegions.at<cv::Vec3b>(k,column) = white;
     }
   }
+  for(signed int i=0; i<gradientVector.size(); i++){
+    cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][0],gradientVector[i][1]), cv::Point(),blue,1,8);
+    //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
+  }
 }
 
 
@@ -232,7 +243,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
  * @param lineRegions
  * The candidate points from the edgeDetection
  */
-void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec8i> &gradientVector) {
+void calculateLineGradients(const cv::Mat &image, const vector<cv::Vec4i> &lineRegions, vector<cv::Vec8i> &gradientVector) {
 
   /*Sobel operators:
    *
@@ -245,11 +256,13 @@ void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegion
    * -1 -2 -1
    */
 
-  signed int upperXGradient = 0;
-  signed int lowerXGradient = 0;
+  //gradient of the upper point
+  signed int upperVerticalGradient = 0;
+  signed int upperHorizontalGradient = 0;
 
-  signed int upperYGradient = 0;
-  signed int lowerYGradient = 0;
+  //gradient of the lower point
+  signed int lowerVerticalGradient = 0;
+  signed int lowerHorizontalGradient = 0;
 
 
   int upperX = 0;
@@ -266,22 +279,44 @@ void calculateGradient(const cv::Mat &image, const vector<cv::Vec4i> &lineRegion
     lowerX = lineRegions[i][2];
     lowerY = lineRegions[i][3];
 
-    upperXGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX-1,upperY)[0] + 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 2 * image.at<cv::Vec3b>(upperX+1,upperY)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY+1)[0];
-    lowerXGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX-1,lowerY)[0] + 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX+1,lowerY)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0];
+    upperVerticalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX-1,upperY)[0] + 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 2 * image.at<cv::Vec3b>(upperX+1,upperY)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY+1)[0];
+    upperHorizontalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX,upperY-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 2 * image.at<cv::Vec3b>(upperX,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperY+1,upperY+1)[0];
 
-    upperYGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX,upperY-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 2 * image.at<cv::Vec3b>(upperX,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperY+1,upperY+1)[0] ;
-    lowerYGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX,lowerY-1)[0] + 1 * image.at<cv::Vec3b>(lowerX+1,lowerY-1)[0] - 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerY+1,lowerY+1)[0] ;
+    lowerVerticalGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX-1,lowerY)[0] + 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX+1,lowerY)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0];
+    lowerHorizontalGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX,lowerY-1)[0] + 1 * image.at<cv::Vec3b>(lowerX+1,lowerY-1)[0] - 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerY+1,lowerY+1)[0];
 
-    gradientVector.push_back(cv::Vec8i(upperX,upperY,lowerX,lowerY,upperXGradient,lowerXGradient,upperYGradient,lowerYGradient)) ;
+    gradientVector.push_back(cv::Vec8i(upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient)) ;
   }
 }
+
+int calculateGradientAngle(int x, int y) {
+  double angleMod180 = (atan(x/y)*180/PI)%180;
+  if(angleMod180<0) cout << "This should not happen" << endl; //remove in build release
+  else if(0<=angleMod180<22.5) return 0;
+  else if(22.5<=angleMod180<45) return 45;
+  else if(45<=angleMod180<67.5) return 45;
+  else if(67.5<=angleMod180<90) return 90;
+  else if(90<=angleMod180<112.5) return 90;
+  else if(112.5<=angleMod180<135) return 135;
+  else if(135<=angleMod180<157.5) return 135;
+  else if(157.5<=angleMod180<180) return 180;
+  else if(180<=angleMod180<202.5) return 180;
+  else if(202.5<=angleMod180<225) return 225;
+  else if(225<=angleMod180<247.5) return 225;
+  else if(247.5<=angleMod180<270) return 270;
+  else if(270<=angleMod180<292.5) return 270;
+  else if(292.5<=angleMod180<315) return 315;
+  else if(315<=angleMod180<337.5) return 315;
+  else if(337.5<=angleMod180<360) return 0;
+}
+
+
 
 double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
 
 }
 
-int main()
-{
+int main() {
   cv::Mat image;
   image = cv::imread("bottom0007.png", CV_LOAD_IMAGE_COLOR);
   cv::Mat imageEdges(image.size().height, image.size().width, CV_8UC3);
@@ -292,25 +327,28 @@ int main()
   vector<cv::Vec4i> fieldRegions; //startX startY endX endY
   vector<cv::Vec4i> lineRegions; //startX startY endX endY
   vector<cv::Vec4i> unknownRegions; //startX startY endX endY
+  vector<cv::Vec8i> gradientVector;
 
-  int t_edge;
-  t_edge = 8;
   std::chrono::duration<float, std::ratio<1, 1000>> delta1;
   std::chrono::duration<float, std::ratio<1, 1000>> delta2;
+  std::chrono::duration<float, std::ratio<1, 1000>> delta3;
 
   chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
-  edgeDetection(image, imageEdges, t_edge, edgePointer);
+  edgeDetection(image, imageEdges, T_EDGE, edgePointer);
   delta1 = chrono::system_clock::now() - startTime;
   classifyRegions(image, edgePointer, fieldRegions, lineRegions, unknownRegions);
-  delta2 = chrono::system_clock::now() - startTime;
-  drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions);
+  delta2 = chrono::system_clock::now() - startTime - delta1;
+  //calculateLineGradients(image, lineRegions, gradientVector);
+  delta3 = chrono::system_clock::now() - startTime - delta1 - delta2;
+  drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions, gradientVector);
 
   cout << "fieldRegions: " << fieldRegions.size() << endl;
   cout << "unknownRegions: " << unknownRegions.size() << endl;
 
   printf("edgeDetection: %fms\n",delta1.count());
   printf("classifyRegions: %fms\n",delta2.count());
-  printf("sum: %fms\n",delta1.count()+delta2.count());
+  printf("calculateLineGradients: %fms\n",delta3.count());
+  printf("sum: %fms\n",delta1.count()+delta2.count()+delta3.count());
   cv::imwrite ("result_regions.png",imageRegions, vector<int>());
   cv::imwrite ("result_lines.png",imageLines, vector<int>());
 
