@@ -229,7 +229,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
     }
   }
   for(signed int i=0; i<gradientVector.size(); i++){
-    cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][0],gradientVector[i][1]), cv::Point(),blue,1,8);
+    //cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][0],gradientVector[i][1]), cv::Point(),blue,1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
 }
@@ -289,8 +289,16 @@ void calculateLineGradients(const cv::Mat &image, const vector<cv::Vec4i> &lineR
   }
 }
 
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+// UNCOMMENT calculateGradientAngle TO BUILD PROJECT
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
 int calculateGradientAngle(int x, int y) {
-  double angleMod180 = (atan(x/y)*180/PI)%180;
+  double angleMod180 = (atan(x/y)*180/PI)%180; //modulo for double?
   if(angleMod180<0) cout << "This should not happen" << endl; //remove in build release
   else if(0<=angleMod180<22.5) return 0;
   else if(22.5<=angleMod180<45) return 45;
@@ -309,8 +317,6 @@ int calculateGradientAngle(int x, int y) {
   else if(315<=angleMod180<337.5) return 315;
   else if(337.5<=angleMod180<360) return 0;
 }
-
-
 
 double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
 
