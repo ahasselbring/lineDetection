@@ -1,6 +1,40 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+
+struct lineRegionData {
+
+  int upperX;       // upperPoint (upperX, upperY)
+  int upperY;      //  _________x________
+                    //           |          } Line-
+  int lowerX;       //  _________|________  } region
+  int lowerY;       //           x
+                    // lower Point (lowerX,lowerY)
+
+
+  // Gradient for the upper Point in each direction
+
+  int upperHorizontalGradient;          // Horizontal (Y)  -------->
+  int upperVerticalGradient;            // Vertical (X)   |
+                                        //                |
+                                        //               \ /
+                                        //
+
+  // Gradient for the upper Point in each direction
+  int lowerHorizontalGradient;
+  int lowerVerticalGradient;
+
+  // The direction of the upper gradient ( atan(x/y) )
+  double upperGradientAngle;
+
+  // The direction of the lower gradient ( atan(x/y) )
+  double lowerGradientAngle;
+
+
+
+
+};
+
 //cv::Vec3b green;
 //green[0] = 0;
 //green[1] = 255;

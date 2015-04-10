@@ -234,6 +234,37 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   }
 }
 
+double calculateGradientAngle(int x, int y) {
+double angleMod180 = 0;
+
+  if(y != 0) {
+    angleMod180 = (atan(x/y)*180/PI); //modulo for double?
+
+
+
+ }
+
+  return angleMod180;
+  /*if(angleMod180<0) cout << "This should not happen" << endl; //remove in build release
+  else if(0<=angleMod180<22.5) return 0;
+  else if(22.5<=angleMod180<45) return 45;
+  else if(45<=angleMod180<67.5) return 45;
+  else if(67.5<=angleMod180<90) return 90;
+  else if(90<=angleMod180<112.5) return 90;
+  else if(112.5<=angleMod180<135) return 135;
+  else if(135<=angleMod180<157.5) return 135;
+  else if(157.5<=angleMod180<180) return 180;
+  else if(180<=angleMod180<202.5) return 180;
+  else if(202.5<=angleMod180<225) return 225;
+  else if(225<=angleMod180<247.5) return 225;
+  else if(247.5<=angleMod180<270) return 270;
+  else if(270<=angleMod180<292.5) return 270;
+  else if(292.5<=angleMod180<315) return 315;
+  else if(315<=angleMod180<337.5) return 315;
+  else if(337.5<=angleMod180<360) return 0;*/
+
+  cout << "Gradient Angle: " << angleMod180 << endl;
+}
 
 /**
  * @brief calculateGradient
@@ -278,13 +309,17 @@ void calculateLineGradients(const cv::Mat &image, const vector<cv::Vec4i> &lineR
 
     lowerX = lineRegions[i][2];
     lowerY = lineRegions[i][3];
+    if(upperX > 0 && upperY > 0 && upperX < image.size().width && upperY < image.size().height) {  // we should use a bool function for that
 
-    upperVerticalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX-1,upperY)[0] + 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 2 * image.at<cv::Vec3b>(upperX+1,upperY)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY+1)[0];
-    upperHorizontalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX,upperY-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 2 * image.at<cv::Vec3b>(upperX,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperY+1,upperY+1)[0];
-
+      upperVerticalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX-1,upperY)[0] + 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 2 * image.at<cv::Vec3b>(upperX+1,upperY)[0] - 1 * image.at<cv::Vec3b>(upperX+1,upperY+1)[0];
+      upperHorizontalGradient = 1 * image.at<cv::Vec3b>(upperX-1,upperY-1)[0] + 2 * image.at<cv::Vec3b>(upperX,upperY-1)[0] + 1 * image.at<cv::Vec3b>(upperX+1,upperY-1)[0] - 1 * image.at<cv::Vec3b>(upperX-1,upperY+1)[0] - 2 * image.at<cv::Vec3b>(upperX,upperY+1)[0] - 1 * image.at<cv::Vec3b>(upperY+1,upperY+1)[0];
+      cout << "Gradient Angle: " << calculateGradientAngle(upperVerticalGradient, upperHorizontalGradient) << endl;
+      //cout << " Upper Y Gradient : " << upperHorizontalGradient << "Upper X Gradient: " << upperVerticalGradient << endl;
+    }
+    if(lowerX > 0 && lowerY > 0 && lowerX < image.size().width && lowerY < image.size().height) {  // we should use a bool function for that
     lowerVerticalGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX-1,lowerY)[0] + 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX+1,lowerY)[0] - 1 * image.at<cv::Vec3b>(lowerX+1,lowerY+1)[0];
     lowerHorizontalGradient = 1 * image.at<cv::Vec3b>(lowerX-1,lowerY-1)[0] + 2 * image.at<cv::Vec3b>(lowerX,lowerY-1)[0] + 1 * image.at<cv::Vec3b>(lowerX+1,lowerY-1)[0] - 1 * image.at<cv::Vec3b>(lowerX-1,lowerY+1)[0] - 2 * image.at<cv::Vec3b>(lowerX,lowerY+1)[0] - 1 * image.at<cv::Vec3b>(lowerY+1,lowerY+1)[0];
-
+    }
     gradientVector.push_back(cv::Vec8i(upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient)) ;
   }
 }
@@ -297,26 +332,8 @@ void calculateLineGradients(const cv::Mat &image, const vector<cv::Vec4i> &lineR
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
 
-int calculateGradientAngle(int x, int y) {
-  double angleMod180 = (atan(x/y)*180/PI)%180; //modulo for double?
-  if(angleMod180<0) cout << "This should not happen" << endl; //remove in build release
-  else if(0<=angleMod180<22.5) return 0;
-  else if(22.5<=angleMod180<45) return 45;
-  else if(45<=angleMod180<67.5) return 45;
-  else if(67.5<=angleMod180<90) return 90;
-  else if(90<=angleMod180<112.5) return 90;
-  else if(112.5<=angleMod180<135) return 135;
-  else if(135<=angleMod180<157.5) return 135;
-  else if(157.5<=angleMod180<180) return 180;
-  else if(180<=angleMod180<202.5) return 180;
-  else if(202.5<=angleMod180<225) return 225;
-  else if(225<=angleMod180<247.5) return 225;
-  else if(247.5<=angleMod180<270) return 270;
-  else if(270<=angleMod180<292.5) return 270;
-  else if(292.5<=angleMod180<315) return 315;
-  else if(315<=angleMod180<337.5) return 315;
-  else if(337.5<=angleMod180<360) return 0;
-}
+
+
 
 double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
 
@@ -344,7 +361,7 @@ int main() {
   delta1 = chrono::system_clock::now() - startTime;
   classifyRegions(image, edgePointer, fieldRegions, lineRegions, unknownRegions);
   delta2 = chrono::system_clock::now() - startTime - delta1;
-  //calculateLineGradients(image, lineRegions, gradientVector);
+  calculateLineGradients(image, lineRegions, gradientVector);
   delta3 = chrono::system_clock::now() - startTime - delta1 - delta2;
   drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions, gradientVector);
 
