@@ -29,15 +29,15 @@ struct lineRegionData {
 
   // Gradient for the upper Point in each direction
 
-  int upperHorizontalGradient;          // Horizontal (Y)  -------->
-  int upperVerticalGradient;            // Vertical (X)   |
+  int upperHorizontalGradient = 0;          // Horizontal (Y)  -------->
+  int upperVerticalGradient = 0;            // Vertical (X)   |
                                         //                |
                                         //               \ /
                                         //                *
 
   // Gradient for the upper Point in each direction
-  int lowerHorizontalGradient;
-  int lowerVerticalGradient;
+  int lowerHorizontalGradient = 0;
+  int lowerVerticalGradient = 0;
 
   // The direction of the upper gradient ( atan(x/y) )
   double upperGradientAngle;

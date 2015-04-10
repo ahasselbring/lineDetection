@@ -81,13 +81,9 @@ void edgeDetectionOnScanline(int column, cv::Mat &image, int t_edge, std::vector
   int fx = 0;
   int g = 0;
 
-  std::chrono::duration<float, std::ratio<1, 1000>> delta;
-  chrono::time_point<std::chrono::system_clock> startTime = chrono::system_clock::now();
   for (int x=0; x<SCANLINE_SIZE; x++) {
     scanline[x] = (image.at<cv::Vec3b>(x,column))[0];
   }
-  delta = chrono::system_clock::now() - startTime;
- // cout << "These ms are to subtract from sum: " << delta.count() << endl;
 
   for(int x = 2; x < SCANLINE_SIZE; x=x+2) {
     fx = scanline[x];
@@ -121,7 +117,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image, int t_edge, std::vector
 
 void edgeDetection(cv::Mat &image, int t_edge, std::vector<struct coordinate> &edges) {
   //+2 cause of downsampling/subsampling
-  for (int column=0;column<image.size().width; column+=1){
+  for (int column=0;column<image.size().width; column+=16){
     struct coordinate topPixel;
     struct coordinate bottomPixel;
     topPixel.x=0;
@@ -189,7 +185,6 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
 
   //line regions:
   for(unsigned int i = 0; i < unknownRegions.size(); i++) {
-    //TODO switched x and y at at
     if(unknownRegions[i].startPoint.x > 0 && unknownRegions[i].endPoint.x < image.size().height ) { //TODO some regions are not processed
       if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.x-1,unknownRegions[i].startPoint.y)[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.x,unknownRegions[i].startPoint.y)[0] ) {
         if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.x+1,unknownRegions[i].startPoint.y)[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.x,unknownRegions[i].startPoint.y)[0]) {
@@ -198,6 +193,15 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
       }
     }
   }
+}
+
+double calculateGradientAngle(double x, double y) {
+  double angle = 0;
+  if(y != 0) {
+    angle = atan(x/y)*180/PI;
+  }
+  //cout << "Gradient Angle: " << angle << endl;
+  return angle;
 }
 
 void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vector<struct region> &lineRegions, vector<struct region> &unknownRegions, vector<struct lineRegionData> &gradientVector, vector<coordinate> &edges){
@@ -255,19 +259,12 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
   }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
-    //cv::line(imageRegions, cv::Point(gradientVector[i][1],gradientVector[i][0]), cv::Point(gradientVector[i][5]+gradientVector[i][1],gradientVector[i][4]+gradientVector[i][0]),cv::Scalar(yellow),1,8);
+    cout << "upperHorizontalGradient: " << gradientVector[i].upperHorizontalGradient << endl;
+    cout << "upperVerticalGradient: " << gradientVector[i].upperVerticalGradient << endl;
+    cout << "angle: " << calculateGradientAngle(gradientVector[i].upperHorizontalGradient, gradientVector[i].upperVerticalGradient) << endl;
+    cv::arrowedLine(imageRegions, cv::Point(gradientVector[i].upperPoint.y,gradientVector[i].upperPoint.x), cv::Point(gradientVector[i].upperHorizontalGradient+gradientVector[i].upperPoint.y,gradientVector[i].upperVerticalGradient+gradientVector[i].upperPoint.x),cv::Scalar(yellow),1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
-}
-
-double calculateGradientAngle(int x, int y) {
-  double angle = 0;
-
-  if(y != 0) { //usefull :D
-    angle = atan(x/y)*180/PI;
-  }
-  //cout << "Gradient Angle: " << angle << endl;
-  return angle;
 }
 
 bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
@@ -309,18 +306,14 @@ void calculateLineGradients(const cv::Mat &image, const vector<struct region> &l
     lineData.lowerPoint.x = lineRegions[i].endPoint.x;
     lineData.lowerPoint.y = lineRegions[i].endPoint.y;
 
-    if(boundaryCheck(image,lineData.upperPoint.x,lineData.upperPoint.y)) {  // TODO: we should use a bool function for that
-
+    if(boundaryCheck(image,lineData.upperPoint.x,lineData.upperPoint.y)) {
       lineData.upperVerticalGradient = 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
       lineData.upperHorizontalGradient = 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.y+1)[0];
-      //cout << "Gradient Angle: " << calculateGradientAngle(upperVerticalGradient, upperHorizontalGradient) << endl;
-      //cout << " Upper Y Gradient : " << upperHorizontalGradient << "Upper X Gradient: " << upperVerticalGradient << endl;
     }
-    if(boundaryCheck(image,lineData.lowerPoint.x,lineData.lowerPoint.y)) {  // we should use a bool function for that
+    if(boundaryCheck(image,lineData.lowerPoint.x,lineData.lowerPoint.y)) {
       lineData.lowerVerticalGradient = 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0];
       lineData.lowerHorizontalGradient = 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0];
     }
-
     gradientVector.push_back(lineData);
   }
 }
