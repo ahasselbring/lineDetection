@@ -4,6 +4,20 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+struct coordinate {
+  int x;
+  int y;
+};
+
+struct region {
+  //x and y coordinate of the region start point
+  int startX;
+  int startY;
+  //x and y coordinate of the region end point
+  int endX;
+  int endY;
+};
+
 struct lineRegionData {
 
   int upperX;       // upperPoint (upperX, upperY)
@@ -34,24 +48,7 @@ struct lineRegionData {
 
   // Linyness
   double linyness;
-
-
-
-
 };
-
-//cv::Vec3b green;// = {0,255,0};
-//green[0] = 0;
-//green[1] = 255;
-//green[2] = 0;
-//cv::Vec3b white;
-//white[0] = 255;
-//white[1] = 255;
-//white[2] = 255;
-//cv::Vec3b red;
-//red[0] = 255;
-//red[1] = 0;
-//red[2] = 0;
 
 #endif // MAIN_HPP
 
