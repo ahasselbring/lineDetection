@@ -119,7 +119,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image,cv::Mat &imageEdges, int
 
 void edgeDetection(cv::Mat &image, cv::Mat &imageEdges, int t_edge, std::vector<cv::Vec2i> &edges) {
   //+2 cause of downsampling/subsampling
-  for (int column=0;column<image.size().width; column+=16){
+  for (int column=0;column<image.size().width; column+=1){
     edges.push_back(cv::Vec2i(0,column));
     edgeDetectionOnScanline(column, image, imageEdges, t_edge, edges);
     edges.push_back(cv::Vec2i(image.size().height,column));
@@ -213,6 +213,10 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   black[0] = 0;
   black[1] = 0;
   black[2] = 0;
+  cv::Vec3b yellow;
+  yellow[0]=0;
+  yellow[1]=255;
+  yellow[2]=255;
 
   for(unsigned int i=0; i<unknownRegions.size(); i++){
     int startX = unknownRegions[i][0];
@@ -243,7 +247,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
-    //cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][0],gradientVector[i][1]), cv::Point(),blue,1,8);
+    //cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][1],gradientVector[i][0]), cv::Point(gradientVector[i][5]+gradientVector[i][1],gradientVector[i][4]+gradientVector[i][0]),cv::Scalar(yellow),1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
 }
