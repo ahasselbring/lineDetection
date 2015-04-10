@@ -1,6 +1,4 @@
 lineDetection.pro.user
-*.user
-*.o
 main.o
 lineDetection.o
 lineDetection.pro
