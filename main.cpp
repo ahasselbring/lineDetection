@@ -247,7 +247,7 @@ void drawResults(cv::Mat &imageRegions, vector<cv::Vec4i> &fieldRegions, vector<
   }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
-    //cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][1],gradientVector[i][0]), cv::Point(gradientVector[i][5]+gradientVector[i][1],gradientVector[i][4]+gradientVector[i][0]),cv::Scalar(yellow),1,8);
+    cv::arrowedLine(imageRegions, cv::Point(gradientVector[i][1],gradientVector[i][0]), cv::Point(gradientVector[i][5]+gradientVector[i][1],gradientVector[i][4]+gradientVector[i][0]),cv::Scalar(yellow),1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
 }
