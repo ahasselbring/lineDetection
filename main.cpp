@@ -271,7 +271,7 @@ double calculateGradientAngle(int x, int y) {
 }
 
 bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
-  if(x>0&&y>0&&x<image.size().height&&y<image.size().width){
+  if(x>0&&y>0&&y<image.size().height&&x<image.size().width){
     return true;
   }
   return false;
