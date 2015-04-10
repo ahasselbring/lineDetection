@@ -126,7 +126,7 @@ void edgeDetection(cv::Mat &image, int t_edge, std::vector<struct coordinate> &e
     struct coordinate bottomPixel;
     topPixel.x=0;
     topPixel.y=column;
-    bottomPixel.x=image.size().height;
+    bottomPixel.x=image.size().height-1;
     bottomPixel.y=column;
     edges.push_back(topPixel);
     edgeDetectionOnScanline(column, image, t_edge, edges);
@@ -254,6 +254,7 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
     }
   }
   for(unsigned int i=0; i<edges.size(); i++){
+    cout << edges[i].x << "," << edges[i].y << endl;
     imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
   }
 
