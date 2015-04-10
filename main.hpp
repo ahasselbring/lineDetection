@@ -32,6 +32,9 @@ struct lineRegionData {
   // The direction of the lower gradient ( atan(x/y) )
   double lowerGradientAngle;
 
+  // Linyness
+  double linyness;
+
 
 
 
