@@ -87,7 +87,7 @@ void edgeDetectionOnScanline(int column, cv::Mat &image, int t_edge, std::vector
     scanline[x] = (image.at<cv::Vec3b>(x,column))[0];
   }
   delta = chrono::system_clock::now() - startTime;
-  cout << "These ms are to subtract from sum: " << delta.count() << endl;
+ // cout << "These ms are to subtract from sum: " << delta.count() << endl;
 
   for(int x = 2; x < SCANLINE_SIZE; x=x+2) {
     fx = scanline[x];
@@ -135,10 +135,7 @@ void edgeDetection(cv::Mat &image, int t_edge, std::vector<struct coordinate> &e
 }
 
 void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std::vector<struct region> &fieldRegions, std::vector<struct region> &lineRegions, std::vector<struct region> &unknownRegions){
-  int currentColumn = 0;
   int nextColumn = 0;
-  int currentX = 0;
-  int nextX = 0;
   int diff = 0;
   int gap = 0;
   int median_Y = 0;
@@ -151,18 +148,18 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
     currentRegion.endPoint.x=edges[i+1].x; //nextX
     currentRegion.endPoint.y=edges[i].y; //currentColumn
     nextColumn = edges[i+1].y;
-    if((nextColumn-currentColumn)==0){
-      diff = nextX-currentX;
+    if((nextColumn-currentRegion.startPoint.y)==0){
+      diff = currentRegion.endPoint.x-currentRegion.startPoint.x;
       gap = diff/6; //TODO: magic number
-      median_Y = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[0],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[0]);
-      median_Cb = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[1],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[1]);
-      median_Cr = medianOfFive(image.at<cv::Vec3b>(currentX+1*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+2*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+3*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+4*gap,currentColumn)[2],image.at<cv::Vec3b>(currentX+5*gap,currentColumn)[2]);
+      median_Y = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[0]);
+      median_Cb = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[1]);
+      median_Cr = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[2]);
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
-
         //update the last vector to connect contiguous regions to hold the vector small
         if(fieldRegions.size()>0){
-          if(fieldRegions[fieldRegions.size()-1].endPoint.x == currentX && fieldRegions[fieldRegions.size()-1].endPoint.y == currentColumn) {
-            fieldRegions[fieldRegions.size()-1].endPoint.x = nextX;
+
+          if(fieldRegions[fieldRegions.size()-1].endPoint.x == currentRegion.startPoint.x && fieldRegions[fieldRegions.size()-1].endPoint.y == currentRegion.startPoint.y) {
+            fieldRegions[fieldRegions.size()-1].endPoint.x = currentRegion.endPoint.x;
           }
           else {
             fieldRegions.push_back(currentRegion);
@@ -175,8 +172,8 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
       }
       else{
         if(unknownRegions.size()>0){
-          if(unknownRegions[unknownRegions.size()-1].endPoint.x == currentX && unknownRegions[unknownRegions.size()-1].endPoint.y == currentColumn) {
-            unknownRegions[unknownRegions.size()-1].endPoint.x = nextX;
+          if(unknownRegions[unknownRegions.size()-1].endPoint.x == currentRegion.startPoint.x && unknownRegions[unknownRegions.size()-1].endPoint.y == currentRegion.startPoint.y) {
+            unknownRegions[unknownRegions.size()-1].endPoint.x = currentRegion.endPoint.x;
           }
           else {
             unknownRegions.push_back(currentRegion);
@@ -254,7 +251,6 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
     }
   }
   for(unsigned int i=0; i<edges.size(); i++){
-    cout << edges[i].x << "," << edges[i].y << endl;
     imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
   }
 
