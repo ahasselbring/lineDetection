@@ -1,11 +1,13 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 struct lineRegionData {
 
   int upperX;       // upperPoint (upperX, upperY)
-  int upperY;      //  _________x________
+  int upperY;       //  _________x________
                     //           |          } Line-
   int lowerX;       //  _________|________  } region
   int lowerY;       //           x
@@ -35,7 +37,7 @@ struct lineRegionData {
 
 };
 
-//cv::Vec3b green;
+//cv::Vec3b green;// = {0,255,0};
 //green[0] = 0;
 //green[1] = 255;
 //green[2] = 0;
