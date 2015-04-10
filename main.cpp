@@ -17,7 +17,6 @@
 #define T_Y 62
 #define T_CB 12
 #define T_CR 30 //19
-#define Y_THRESHOLD 0 //30  //TODO: to be optimized
 #define PI 3.14159265
 
 using namespace std;
@@ -153,7 +152,6 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
         //update the last vector to connect contiguous regions to hold the vector small
         if(fieldRegions.size()>0){
-
           if(fieldRegions[fieldRegions.size()-1].endPoint.x == currentRegion.startPoint.x && fieldRegions[fieldRegions.size()-1].endPoint.y == currentRegion.startPoint.y) {
             fieldRegions[fieldRegions.size()-1].endPoint.x = currentRegion.endPoint.x;
           }
@@ -186,8 +184,8 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
   //line regions:
   for(unsigned int i = 0; i < unknownRegions.size(); i++) {
     if(unknownRegions[i].startPoint.x > 0 && unknownRegions[i].endPoint.x < image.size().height ) { //TODO some regions are not processed
-      if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.x-1,unknownRegions[i].startPoint.y)[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.x,unknownRegions[i].startPoint.y)[0] ) {
-        if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.x+1,unknownRegions[i].startPoint.y)[0] + Y_THRESHOLD) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.x,unknownRegions[i].startPoint.y)[0]) {
+      if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.x-1,unknownRegions[i].startPoint.y)[0]) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.x,unknownRegions[i].startPoint.y)[0] ) {
+        if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.x+1,unknownRegions[i].startPoint.y)[0]) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.x,unknownRegions[i].startPoint.y)[0]) {
           lineRegions.push_back(unknownRegions[i]);
         }
       }
@@ -254,9 +252,6 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
       imageRegions.at<cv::Vec3b>(k,column) = white;
     }
   }
-  for(unsigned int i=0; i<edges.size(); i++){
-    imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
-  }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
     cout << "upperHorizontalGradient: " << gradientVector[i].upperHorizontalGradient << endl;
@@ -265,6 +260,11 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
     cv::arrowedLine(imageRegions, cv::Point(gradientVector[i].upperPoint.y,gradientVector[i].upperPoint.x), cv::Point(gradientVector[i].upperHorizontalGradient+gradientVector[i].upperPoint.y,gradientVector[i].upperVerticalGradient+gradientVector[i].upperPoint.x),cv::Scalar(yellow),1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
+  for(unsigned int i=0; i<edges.size(); i++){
+    imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
+  }
+
+
 }
 
 bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
