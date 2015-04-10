@@ -11,21 +11,20 @@ struct coordinate {
 
 struct region {
   //x and y coordinate of the region start point
-  int startX;
-  int startY;
+  struct coordinate startPoint;
   //x and y coordinate of the region end point
-  int endX;
-  int endY;
+  struct coordinate endPoint;
 };
 
 struct lineRegionData {
 
-  int upperX;       // upperPoint (upperX, upperY)
-  int upperY;       //  _________x________
-                    //           |          } Line-
-  int lowerX;       //  _________|________  } region
-  int lowerY;       //           x
-                    // lower Point (lowerX,lowerY)
+
+  struct coordinate upperPoint;   // upperPoint (upperX, upperY)
+                                  //  _________x________
+                                  //           |          } Line-
+                                  //  _________|________  } region
+                                  //           x
+  struct coordinate lowerPoint;  // lower Point (lowerX,lowerY)
 
 
   // Gradient for the upper Point in each direction
