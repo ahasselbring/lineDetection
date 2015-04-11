@@ -46,7 +46,7 @@ struct lineRegionData {
   double lowerGradientAngle;
 
   // Linyness
-  double linyness;
+  double lineliness;
 };
 
 #endif // MAIN_HPP
