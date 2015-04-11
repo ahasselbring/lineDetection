@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <math.h>
+#include <cmath>
 #include <chrono>
 #include <ctime>
 #include <main.hpp>
@@ -18,6 +19,9 @@
 #define T_CB 12
 #define T_CR 30 //19
 #define PI 3.14159265
+//TODO Determine these thresholds
+#define D_MIN 0
+#define D_MAX 255
 
 using namespace std;
 
@@ -254,12 +258,8 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
   }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
-    cout << "upperHorizontalGradient: " << gradientVector[i].upperHorizontalGradient << endl;
-    cout << "upperVerticalGradient: " << gradientVector[i].upperVerticalGradient << endl;
-    cout << "angle: " << calculateGradientAngle(gradientVector[i].upperHorizontalGradient, gradientVector[i].upperVerticalGradient) << endl;
-    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.y,gradientVector[i].upperPoint.x), cv::Point(gradientVector[i].upperHorizontalGradient / 10+ gradientVector[i].upperPoint.y,gradientVector[i].upperVerticalGradient / 10 +gradientVector[i].upperPoint.x),cv::Scalar(blue),1,8);
-    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.y,gradientVector[i].lowerPoint.x), cv::Point(gradientVector[i].lowerHorizontalGradient / 10+ gradientVector[i].lowerPoint.y,gradientVector[i].lowerVerticalGradient / 10 +gradientVector[i].lowerPoint.x),cv::Scalar(yellow),1,8);
-    //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
+    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.y,gradientVector[i].upperPoint.x), cv::Point(gradientVector[i].upperGradient.horizontal / 10+ gradientVector[i].upperPoint.y,gradientVector[i].upperGradient.vertical / 10 +gradientVector[i].upperPoint.x),cv::Scalar(blue),1,8);
+    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.y,gradientVector[i].lowerPoint.x), cv::Point(gradientVector[i].lowerGradient.horizontal / 10+ gradientVector[i].lowerPoint.y,gradientVector[i].lowerGradient.vertical / 10 +gradientVector[i].lowerPoint.x),cv::Scalar(yellow),1,8);
   }
   for(unsigned int i=0; i<edges.size(); i++){
     imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
@@ -308,33 +308,77 @@ void calculateLineGradients(const cv::Mat &image, const vector<struct region> &l
     lineData.lowerPoint.y = lineRegions[i].endPoint.y;
 
     if(boundaryCheck(image,lineData.upperPoint.x,lineData.upperPoint.y)) {
-      lineData.upperVerticalGradient = 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
-      lineData.upperHorizontalGradient = -1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
+      lineData.upperGradient.vertical = 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
+      lineData.upperGradient.horizontal = -1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
     }
     if(boundaryCheck(image,lineData.lowerPoint.x,lineData.lowerPoint.y)) {
-      lineData.lowerVerticalGradient = -1 * (1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
-      lineData.lowerHorizontalGradient = -1 * (-1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
+      lineData.lowerGradient.vertical = -1 * (1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
+      lineData.lowerGradient.horizontal = -1 * (-1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
     }
     gradientVector.push_back(lineData);
   }
-}
-
-double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
 }
 
 double scalarProduct(struct coordinate point1, struct coordinate point2) {
   return point1.x*point2.x+point1.y*point2.y;
 }
 
+double scalarProduct(struct coordinate point1, struct gradient point2) {
+  return point1.x*point2.vertical+point1.y*point2.horizontal;
+}
+
+/**
+ * @brief subtractVector
+ * subtracts point1 from point2
+ * @param point1
+ * @param point2
+ * @return
+ */
+struct coordinate subtractVector(struct coordinate point1, struct coordinate point2) {
+  struct coordinate result;
+  result.x = point1.x - point2.x;
+  result.y = point1.y - point2.y;
+  return result;
+}
+
+/**
+ * @brief addVector
+ * Adds point1 to point2
+ * @param point1
+ * @param point2
+ * @return
+ */
+struct coordinate addVector(struct coordinate point1, struct coordinate point2) {
+  struct coordinate result;
+  result.x = point1.x + point2.x;
+  result.y = point1.y + point2.y;
+  return result;
+}
+
+double absVector(struct coordinate vec) {
+  return ( sqrt(pow(vec.x,2)+ pow(vec.y,2)));
+}
+
+double absVector(struct gradient vec) {
+  return ( sqrt(pow(vec.vertical,2)+ pow(vec.horizontal,2)));
+}
 
 
-double evaluateAdjacentPoints( vector<struct lineRegionData> &gradientVector) {
+
+void evaluateAdjacentPoints( vector<struct lineRegionData> &gradientVector) {
+
   for(unsigned int i = 0; i < gradientVector.size(); i++) {
-    if(scalarProduct(gradientVector[i].upperPoint, gradientVector[i+1].upperPoint) > 0) {
-      //gradientVector[i].linyness = 1 -
-    }
+     struct coordinate upper_v_ij = subtractVector(gradientVector[i].upperPoint,gradientVector[i+1].upperPoint);
+     if(absVector(upper_v_ij) >= D_MIN && absVector(upper_v_ij) <= D_MAX) {
+       if(scalarProduct(gradientVector[i].upperPoint, gradientVector[i+1].upperPoint) > 0) {
+         struct coordinate upper_v_ij = subtractVector(gradientVector[i].upperPoint,gradientVector[i+1].upperPoint);
+
+         gradientVector[i].lineliness = 1 - (( (abs(scalarProduct(upper_v_ij,gradientVector[i].upperGradient)) / (absVector(upper_v_ij) * absVector(gradientVector[i].upperGradient))) + (abs(scalarProduct(upper_v_ij,gradientVector[i+1].upperGradient)) / (absVector(upper_v_ij) * absVector(gradientVector[i+1].upperGradient)))  ) / 2);
+         cout << "lineliness " << i << ": " << gradientVector[i].lineliness << endl;
+       }
+     }
+
   }
-  return 0;
 }
 
 int main() {
@@ -363,7 +407,7 @@ int main() {
   delta2 = chrono::system_clock::now() - startTime - delta1;
   calculateLineGradients(image, lineRegions, gradientVector);
   delta3 = chrono::system_clock::now() - startTime - delta1 - delta2;
-
+  evaluateAdjacentPoints(gradientVector);
   drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions, gradientVector, edges);
 
   cout << "fieldRegions: " << fieldRegions.size() << endl;

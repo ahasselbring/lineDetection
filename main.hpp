@@ -16,6 +16,11 @@ struct region {
   struct coordinate endPoint;
 };
 
+struct gradient {
+  signed int horizontal = 0;
+  signed int vertical = 0;
+};
+
 struct lineRegionData {
 
 
@@ -29,15 +34,18 @@ struct lineRegionData {
 
   // Gradient for the upper Point in each direction
 
-  signed int upperHorizontalGradient = 0;      // Horizontal (Y)  -------->
-  signed int upperVerticalGradient = 0;        // Vertical (X)   |
+  //signed int upperHorizontalGradient = 0;      // Horizontal (Y)  -------->
+  //signed int upperVerticalGradient = 0;        // Vertical (X)   |
                                                //                |
                                                //               \ /
                                                //                *
-
+  struct gradient upperGradient;
+  struct gradient lowerGradient;
   // Gradient for the upper Point in each direction
-  int lowerHorizontalGradient = 0;
-  int lowerVerticalGradient = 0;
+  //int lowerHorizontalGradient = 0;
+  //int lowerVerticalGradient = 0;
+
+
 
   // The direction of the upper gradient ( atan(x/y) )
   double upperGradientAngle;
