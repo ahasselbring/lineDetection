@@ -20,8 +20,8 @@
 #define T_CR 30 //19
 #define PI 3.14159265
 //TODO Determine these thresholds
-#define D_MIN 0
-#define D_MAX 21
+#define D_MIN 1
+#define D_MAX 42
 
 using namespace std;
 
@@ -239,49 +239,51 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
   cyan[1] = 255;
   cyan[2] = 0;
 
-  for(unsigned int i=0; i<unknownRegions.size(); i++){
-    int startY = unknownRegions[i].startPoint.y;
-    int endY = unknownRegions[i].endPoint.y;
-    int column = unknownRegions[i].startPoint.x;
-    for(int y=startY; y<=endY; y++){
-      imageRegions.at<cv::Vec3b>(y,column) = red;
-    }
-  }
-  for(unsigned int i=0; i<fieldRegions.size(); i++){
-    int startY = fieldRegions[i].startPoint.y;
-    int endY = fieldRegions[i].endPoint.y;
-    int column = fieldRegions[i].startPoint.x;
-    for(int y=startY; y<=endY; y++){
-      imageRegions.at<cv::Vec3b>(y,column) = green;
-    }
-  }
-  for(unsigned int i=0; i<lineRegions.size(); i++){
-    int startY = lineRegions[i].startPoint.y;
-    int endY = lineRegions[i].endPoint.y;
-    int column = lineRegions[i].startPoint.x;
-    for(int y=startY; y<=endY; y++){
-      imageRegions.at<cv::Vec3b>(y,column) = cyan;
-    }
-  }
+//  for(unsigned int i=0; i<unknownRegions.size(); i++){
+//    int startY = unknownRegions[i].startPoint.y;
+//    int endY = unknownRegions[i].endPoint.y;
+//    int column = unknownRegions[i].startPoint.x;
+//    for(int y=startY; y<=endY; y++){
+//      imageRegions.at<cv::Vec3b>(y,column) = red;
+//    }
+//  }
+//  for(unsigned int i=0; i<fieldRegions.size(); i++){
+//    int startY = fieldRegions[i].startPoint.y;
+//    int endY = fieldRegions[i].endPoint.y;
+//    int column = fieldRegions[i].startPoint.x;
+//    for(int y=startY; y<=endY; y++){
+//      imageRegions.at<cv::Vec3b>(y,column) = green;
+//    }
+//  }
+//  for(unsigned int i=0; i<lineRegions.size(); i++){
+//    int startY = lineRegions[i].startPoint.y;
+//    int endY = lineRegions[i].endPoint.y;
+//    int column = lineRegions[i].startPoint.x;
+//    for(int y=startY; y<=endY; y++){
+//      imageRegions.at<cv::Vec3b>(y,column) = cyan;
+//    }
+//  }
 
-  for(unsigned int i=0; i<gradientVector.size(); i++){
-    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.x,gradientVector[i].upperPoint.y), cv::Point(gradientVector[i].upperGradient.horizontal / 10+ gradientVector[i].upperPoint.x,gradientVector[i].upperGradient.vertical / 10 +gradientVector[i].upperPoint.y),cv::Scalar(blue),1,8);
-    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.x,gradientVector[i].lowerPoint.y), cv::Point(gradientVector[i].lowerGradient.horizontal / 10+ gradientVector[i].lowerPoint.x,gradientVector[i].lowerGradient.vertical / 10 +gradientVector[i].lowerPoint.y),cv::Scalar(yellow),1,8);
-  }
+//  for(unsigned int i=0; i<gradientVector.size(); i++){
+//    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.x,gradientVector[i].upperPoint.y), cv::Point(gradientVector[i].upperGradient.horizontal / 10+ gradientVector[i].upperPoint.x,gradientVector[i].upperGradient.vertical / 10 +gradientVector[i].upperPoint.y),cv::Scalar(blue),1,8);
+//    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.x,gradientVector[i].lowerPoint.y), cv::Point(gradientVector[i].lowerGradient.horizontal / 10+ gradientVector[i].lowerPoint.x,gradientVector[i].lowerGradient.vertical / 10 +gradientVector[i].lowerPoint.y),cv::Scalar(yellow),1,8);
+//  }
 
-  for(unsigned int i = 0; i < edgePointPairs.size(); i++) {
-    cv::line(imageRegions, cv::Point(edgePointPairs[i].point1.x,edgePointPairs[i].point1.y), cv::Point(edgePointPairs[i].point2.x,edgePointPairs[i].point2.y), cv::Scalar(red));
+//  for(unsigned int i = 0; i < edgePointPairs.size(); i++) {
+//    cv::line(imageRegions, cv::Point(edgePointPairs[i].point1.x,edgePointPairs[i].point1.y), cv::Point(edgePointPairs[i].point2.x,edgePointPairs[i].point2.y), cv::Scalar(red));
 
-  }
+//  }
+
+
+
+//  for(unsigned int i=0; i<edges.size(); i++){
+//    imageRegions.at<cv::Vec3b>(edges[i].y,edges[i].x) = black;
+//  }
 
   for(unsigned int i = 0; i < lineVector.size(); i ++) {
     for(unsigned int j = 0; j < lineVector[i].linePoints.size(); j+=2) {
       cv::line(imageRegions, cv::Point(lineVector[i].linePoints[j].x,lineVector[i].linePoints[j].y),cv::Point(lineVector[i].linePoints[j+1].x,lineVector[i].linePoints[j+1].y), cv::Scalar(blue) );
     }
-  }
-
-  for(unsigned int i=0; i<edges.size(); i++){
-    imageRegions.at<cv::Vec3b>(edges[i].y,edges[i].x) = black;
   }
 }
 
@@ -496,20 +498,23 @@ void groupLinePairs(vector<struct edgePointPair> &edgePointPairs, vector<struct 
       }
 
       //cout << "Distance Measure: " << distance << endl;
-      if( distance < 4) {
+      if( distance < 7) {  //TODO abs ??
         struct lineData lineSegment;
         lineSegment.linePoints.push_back(edgePointPairs[i].point1);
         lineSegment.linePoints.push_back(edgePointPairs[i].point2);
         lineSegment.linePoints.push_back(edgePointPairs[j].point1);
         lineSegment.linePoints.push_back(edgePointPairs[j].point2);
         lineVector.push_back(lineSegment);
-        edgePointPairs.erase(edgePointPairs.begin()+i);
-        edgePointPairs.erase(edgePointPairs.begin()+j);
+
+        //edgePointPairs.erase(edgePointPairs.begin()+j);
         end_i = edgePointPairs.size();
         end_j = edgePointPairs.size();
       }
       j++;
      }
+    //edgePointPairs.erase(edgePointPairs.begin()+i);
+    end_i = edgePointPairs.size();
+    end_j = edgePointPairs.size();
     i++;
   }
 }
