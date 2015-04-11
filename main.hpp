@@ -21,10 +21,20 @@ struct gradient {
   signed int vertical = 0;
 };
 
-struct line {
+struct lineData {
   std::vector<struct coordinate> linePoints;
 
+  struct coordinate startPoint;
+  struct coordinate endPoint;
+
 };
+
+struct edgePointPair {
+  struct coordinate point1;
+  struct coordinate point2;
+
+};
+
 
 struct lineRegionData {
 
@@ -59,7 +69,8 @@ struct lineRegionData {
   double lowerGradientAngle;
 
   // Linyness
-  double lineliness;
+  double upperLineliness;
+  double lowerLineliness;
 };
 
 #endif // MAIN_HPP
