@@ -29,11 +29,11 @@ struct lineRegionData {
 
   // Gradient for the upper Point in each direction
 
-  int upperHorizontalGradient = 0;      // Horizontal (Y)  -------->
-  int upperVerticalGradient = 0;        // Vertical (X)   |
-                                        //                |
-                                        //               \ /
-                                        //                *
+  signed int upperHorizontalGradient = 0;      // Horizontal (Y)  -------->
+  signed int upperVerticalGradient = 0;        // Vertical (X)   |
+                                               //                |
+                                               //               \ /
+                                               //                *
 
   // Gradient for the upper Point in each direction
   int lowerHorizontalGradient = 0;
