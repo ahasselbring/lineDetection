@@ -209,7 +209,7 @@ double calculateGradientAngle(double x, double y) {
 }
 
 
-void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vector<struct region> &lineRegions, vector<struct region> &unknownRegions, vector<struct lineRegionData> &gradientVector, vector<coordinate> &edges, vector<struct edgePointPair> &edgePointPairs, vector<struct lineRegions> &lineVector){
+void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vector<struct region> &lineRegions, vector<struct region> &unknownRegions, vector<struct lineRegionData> &gradientVector, vector<coordinate> &edges, vector<struct edgePointPair> &edgePointPairs, vector<struct lineData> &lineVector){
   cv::Vec3b green;
   green[0] = 0; //B
   green[1] = 255; //G
@@ -280,10 +280,11 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
   }
 
   for(unsigned int i = 0; i < lineVector.size(); i ++) {
-    for(unsigned int j = 0; j < lineVector[i].linePoints.size(); j++) {
-    // magic
+    for(unsigned int j = 0; j < lineVector[i].linePoints.size(); j+=2) {
+      cv::line(imageRegions, cv::Point(lineVector[i].linePoints[j].x,lineVector[i].linePoints[j].y),cv::Point(lineVector[i].linePoints[j+1].x,lineVector[i].linePoints[j+1].y), cv::Scalar(blue) );
     }
   }
+}
 
 //yep
 bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
@@ -498,7 +499,7 @@ void groupLinePairs(vector<struct edgePointPair> &edgePointPairs, vector<struct 
       }
 
       //cout << "Distance Measure: " << distance << endl;
-      if( abs(distance) < 1) {
+      if( distance < 4) {
         struct lineData lineSegment;
         lineSegment.linePoints.push_back(edgePointPairs[i].point1);
         lineSegment.linePoints.push_back(edgePointPairs[i].point2);
