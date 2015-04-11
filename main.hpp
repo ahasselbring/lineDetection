@@ -21,6 +21,11 @@ struct gradient {
   signed int vertical = 0;
 };
 
+struct line {
+  std::vector<struct coordinate> linePoints;
+
+};
+
 struct lineRegionData {
 
 
