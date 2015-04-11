@@ -17,8 +17,8 @@ struct region {
 };
 
 struct gradient {
-  signed int horizontal = 0;
-  signed int vertical = 0;
+  signed int horizontal;
+  signed int vertical;
 };
 
 struct lineData {
