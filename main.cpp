@@ -67,7 +67,7 @@ bool fieldCheck(int Y, int Cb, int Cr) {
   return false;
 }
 
-
+//yep
 void edgeDetectionOnScanline(int column, cv::Mat &image, int t_edge, std::vector<coordinate> &edges){
 
   int SCANLINE_SIZE = image.size().height;
@@ -75,60 +75,62 @@ void edgeDetectionOnScanline(int column, cv::Mat &image, int t_edge, std::vector
 
   int g_max = -t_edge;
   int g_min = t_edge;
-  int x_peak = 0;
-  int fx_last = scanline[0];
-  int fx = 0;
+  int yPeak = 0;
+  int fYLast = scanline[0];
+  int fY = 0;
   int g = 0;
 
-  for (int x=0; x<SCANLINE_SIZE; x++) {
-    scanline[x] = (image.at<cv::Vec3b>(x,column))[0];
+  for (int y=0; y<SCANLINE_SIZE; y++) {
+    scanline[y] = (image.at<cv::Vec3b>(y,column))[0];
   }
 
-  for(int x = 2; x < SCANLINE_SIZE; x=x+2) {
-    fx = scanline[x];
-    g = fx - fx_last;
+  for(int y = 2; y < SCANLINE_SIZE; y=y+2) {
+    fY = scanline[y];
+    g = fY - fYLast;
     if(g > g_max) {
       if(g_min < (-t_edge)) {
         struct coordinate peak;
-        peak.x=x_peak;
-        peak.y=column;
+        peak.y=yPeak;
+        peak.x=column;
         edges.push_back(peak);
       }
       g_max = g;
       g_min = t_edge;
-      x_peak = x - 1;
+      yPeak = y - 1;
     }
 
     if(g < g_min) {
       if(g_max > t_edge) {
         struct coordinate peak;
-        peak.x=x_peak;
-        peak.y=column;
+        peak.y=yPeak;
+        peak.x=column;
         edges.push_back(peak);
       }
       g_min = g;
       g_max = (-t_edge);
-      x_peak = x - 1;
+      yPeak = y - 1;
     }
-    fx_last = fx;
+    fYLast = fY;
   }
 }
 
+//yep
 void edgeDetection(cv::Mat &image, int t_edge, std::vector<struct coordinate> &edges) {
   //+2 cause of downsampling/subsampling
   for (int column=0;column<image.size().width; column+=16){
     struct coordinate topPixel;
     struct coordinate bottomPixel;
-    topPixel.x=0;
-    topPixel.y=column;
-    bottomPixel.x=image.size().height-1;
-    bottomPixel.y=column;
+    topPixel.y=0;
+    topPixel.x=column;
+    bottomPixel.y=image.size().height-1;
+    bottomPixel.x=column;
     edges.push_back(topPixel);
     edgeDetectionOnScanline(column, image, t_edge, edges);
     edges.push_back(bottomPixel);
   }
 }
 
+//yep
 void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std::vector<struct region> &fieldRegions, std::vector<struct region> &lineRegions, std::vector<struct region> &unknownRegions){
   int nextColumn = 0;
   int diff = 0;
@@ -138,22 +140,22 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
   int median_Cr = 0;
   for (unsigned int i=0; i<edges.size()-1; i++){
     struct region currentRegion;
-    currentRegion.startPoint.x=edges[i].x; //currentX
-    currentRegion.startPoint.y=edges[i].y; //currentColumn
-    currentRegion.endPoint.x=edges[i+1].x; //nextX
-    currentRegion.endPoint.y=edges[i].y; //currentColumn
-    nextColumn = edges[i+1].y;
-    if((nextColumn-currentRegion.startPoint.y)==0){
-      diff = currentRegion.endPoint.x-currentRegion.startPoint.x;
+    currentRegion.startPoint.y=edges[i].y; //currentX
+    currentRegion.startPoint.x=edges[i].x; //currentColumn
+    currentRegion.endPoint.y=edges[i+1].y; //nextX
+    currentRegion.endPoint.x=edges[i].x; //currentColumn
+    nextColumn = edges[i+1].x;
+    if((nextColumn-currentRegion.startPoint.x)==0){
+      diff = currentRegion.endPoint.y-currentRegion.startPoint.y;
       gap = diff/6; //TODO: magic number
-      median_Y = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[0],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[0]);
-      median_Cb = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[1],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[1]);
-      median_Cr = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.x+1*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+2*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+3*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+4*gap,currentRegion.startPoint.y)[2],image.at<cv::Vec3b>(currentRegion.startPoint.x+5*gap,currentRegion.startPoint.y)[2]);
+      median_Y = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.y+1*gap,currentRegion.startPoint.x)[0],image.at<cv::Vec3b>(currentRegion.startPoint.y+2*gap,currentRegion.startPoint.x)[0],image.at<cv::Vec3b>(currentRegion.startPoint.y+3*gap,currentRegion.startPoint.x)[0],image.at<cv::Vec3b>(currentRegion.startPoint.y+4*gap,currentRegion.startPoint.x)[0],image.at<cv::Vec3b>(currentRegion.startPoint.y+5*gap,currentRegion.startPoint.x)[0]);
+      median_Cb = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.y+1*gap,currentRegion.startPoint.x)[1],image.at<cv::Vec3b>(currentRegion.startPoint.y+2*gap,currentRegion.startPoint.x)[1],image.at<cv::Vec3b>(currentRegion.startPoint.y+3*gap,currentRegion.startPoint.x)[1],image.at<cv::Vec3b>(currentRegion.startPoint.y+4*gap,currentRegion.startPoint.x)[1],image.at<cv::Vec3b>(currentRegion.startPoint.y+5*gap,currentRegion.startPoint.x)[1]);
+      median_Cr = medianOfFive(image.at<cv::Vec3b>(currentRegion.startPoint.y+1*gap,currentRegion.startPoint.x)[2],image.at<cv::Vec3b>(currentRegion.startPoint.y+2*gap,currentRegion.startPoint.x)[2],image.at<cv::Vec3b>(currentRegion.startPoint.y+3*gap,currentRegion.startPoint.x)[2],image.at<cv::Vec3b>(currentRegion.startPoint.y+4*gap,currentRegion.startPoint.x)[2],image.at<cv::Vec3b>(currentRegion.startPoint.y+5*gap,currentRegion.startPoint.x)[2]);
       if(fieldCheck(median_Y,median_Cb,median_Cr)){
         //update the last vector to connect contiguous regions to hold the vector small
         if(fieldRegions.size()>0){
-          if(fieldRegions[fieldRegions.size()-1].endPoint.x == currentRegion.startPoint.x && fieldRegions[fieldRegions.size()-1].endPoint.y == currentRegion.startPoint.y) {
-            fieldRegions[fieldRegions.size()-1].endPoint.x = currentRegion.endPoint.x;
+          if(fieldRegions[fieldRegions.size()-1].endPoint.y == currentRegion.startPoint.y && fieldRegions[fieldRegions.size()-1].endPoint.x == currentRegion.startPoint.x) {
+            fieldRegions[fieldRegions.size()-1].endPoint.y = currentRegion.endPoint.y;
           }
           else {
             fieldRegions.push_back(currentRegion);
@@ -166,8 +168,8 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
       }
       else{
         if(unknownRegions.size()>0){
-          if(unknownRegions[unknownRegions.size()-1].endPoint.x == currentRegion.startPoint.x && unknownRegions[unknownRegions.size()-1].endPoint.y == currentRegion.startPoint.y) {
-            unknownRegions[unknownRegions.size()-1].endPoint.x = currentRegion.endPoint.x;
+          if(unknownRegions[unknownRegions.size()-1].endPoint.y == currentRegion.startPoint.y && unknownRegions[unknownRegions.size()-1].endPoint.x == currentRegion.startPoint.x) {
+            unknownRegions[unknownRegions.size()-1].endPoint.y = currentRegion.endPoint.y;
           }
           else {
             unknownRegions.push_back(currentRegion);
@@ -183,9 +185,9 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
 
   //line regions:
   for(unsigned int i = 0; i < unknownRegions.size(); i++) {
-    if(unknownRegions[i].startPoint.x > 0 && unknownRegions[i].endPoint.x < image.size().height ) { //TODO some regions are not processed
-      if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.x-1,unknownRegions[i].startPoint.y)[0]) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.x,unknownRegions[i].startPoint.y)[0] ) {
-        if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.x+1,unknownRegions[i].startPoint.y)[0]) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.x,unknownRegions[i].startPoint.y)[0]) {
+    if(unknownRegions[i].startPoint.y > 0 && unknownRegions[i].endPoint.y < image.size().height ) { //TODO some regions are not processed
+      if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.y-1,unknownRegions[i].startPoint.x)[0]) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.y,unknownRegions[i].startPoint.x)[0] ) {
+        if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.y+1,unknownRegions[i].startPoint.x)[0]) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.y,unknownRegions[i].startPoint.x)[0]) {
           lineRegions.push_back(unknownRegions[i]);
         }
       }
@@ -201,6 +203,7 @@ double calculateGradientAngle(double x, double y) {
   //cout << "Gradient Angle: " << angle << endl;
   return angle;
 }
+
 
 void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vector<struct region> &lineRegions, vector<struct region> &unknownRegions, vector<struct lineRegionData> &gradientVector, vector<coordinate> &edges){
   cv::Vec3b green;
@@ -227,47 +230,48 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
   yellow[0]=0;
   yellow[1]=255;
   yellow[2]=255;
+  cv::Vec3b cyan;
+  cyan[0] = 255;
+  cyan[1] = 255;
+  cyan[2] = 0;
 
   for(unsigned int i=0; i<unknownRegions.size(); i++){
-    int startX = unknownRegions[i].startPoint.x;
-    int endX = unknownRegions[i].endPoint.x;
-    int column = unknownRegions[i].startPoint.y;
-    for(int k=startX; k<=endX; k++){
-      imageRegions.at<cv::Vec3b>(k,column) = red;
+    int startY = unknownRegions[i].startPoint.y;
+    int endY = unknownRegions[i].endPoint.y;
+    int column = unknownRegions[i].startPoint.x;
+    for(int y=startY; y<=endY; y++){
+      imageRegions.at<cv::Vec3b>(y,column) = red;
     }
   }
   for(unsigned int i=0; i<fieldRegions.size(); i++){
-    int startX = fieldRegions[i].startPoint.x;
-    int endX = fieldRegions[i].endPoint.x;
-    int column = fieldRegions[i].startPoint.y;
-    for(int k=startX; k<=endX; k++){
-      imageRegions.at<cv::Vec3b>(k,column) = green;
+    int startY = fieldRegions[i].startPoint.y;
+    int endY = fieldRegions[i].endPoint.y;
+    int column = fieldRegions[i].startPoint.x;
+    for(int y=startY; y<=endY; y++){
+      imageRegions.at<cv::Vec3b>(y,column) = green;
     }
   }
   for(unsigned int i=0; i<lineRegions.size(); i++){
-    int startX = lineRegions[i].startPoint.x;
-    int endX = lineRegions[i].endPoint.x;
-    int column = lineRegions[i].startPoint.y;
-    for(int k=startX; k<=endX; k++){
-      imageRegions.at<cv::Vec3b>(k,column) = white;
+    int startY = lineRegions[i].startPoint.y;
+    int endY = lineRegions[i].endPoint.y;
+    int column = lineRegions[i].startPoint.x;
+    for(int y=startY; y<=endY; y++){
+      imageRegions.at<cv::Vec3b>(y,column) = cyan;
     }
   }
 
   for(unsigned int i=0; i<gradientVector.size(); i++){
-    cout << "upperHorizontalGradient: " << gradientVector[i].upperHorizontalGradient << endl;
-    cout << "upperVerticalGradient: " << gradientVector[i].upperVerticalGradient << endl;
-    cout << "angle: " << calculateGradientAngle(gradientVector[i].upperHorizontalGradient, gradientVector[i].upperVerticalGradient) << endl;
-    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.y,gradientVector[i].upperPoint.x), cv::Point(gradientVector[i].upperHorizontalGradient / 10+ gradientVector[i].upperPoint.y,gradientVector[i].upperVerticalGradient / 10 +gradientVector[i].upperPoint.x),cv::Scalar(blue),1,8);
-    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.y,gradientVector[i].lowerPoint.x), cv::Point(gradientVector[i].lowerHorizontalGradient / 10+ gradientVector[i].lowerPoint.y,gradientVector[i].lowerVerticalGradient / 10 +gradientVector[i].lowerPoint.x),cv::Scalar(yellow),1,8);
+    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.x,gradientVector[i].upperPoint.y), cv::Point(gradientVector[i].upperHorizontalGradient / 10+ gradientVector[i].upperPoint.x,gradientVector[i].upperVerticalGradient / 10 +gradientVector[i].upperPoint.y),cv::Scalar(blue),1,8);
+    cv::line(imageRegions, cv::Point(gradientVector[i].lowerPoint.x,gradientVector[i].lowerPoint.y), cv::Point(gradientVector[i].lowerHorizontalGradient / 10+ gradientVector[i].lowerPoint.x,gradientVector[i].lowerVerticalGradient / 10 +gradientVector[i].lowerPoint.y),cv::Scalar(yellow),1,8);
     //upperX,upperY,lowerX,lowerY,upperVerticalGradient,upperHorizontalGradient,lowerVerticalGradient,lowerHorizontalGradient
   }
+
   for(unsigned int i=0; i<edges.size(); i++){
-    imageRegions.at<cv::Vec3b>(edges[i].x,edges[i].y) = black;
+    imageRegions.at<cv::Vec3b>(edges[i].y,edges[i].x) = black;
   }
-
-
 }
 
+//yep
 bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
   if(x>0&&y>0&&y<image.size().height&&x<image.size().width){
     return true;
@@ -283,6 +287,8 @@ bool boundaryCheck(const cv::Mat &image, const int &x, const int &y){
  * @param lineRegions
  * The candidate points from the edgeDetection
  */
+
+//yep
 void calculateLineGradients(const cv::Mat &image, const vector<struct region> &lineRegions, vector<struct lineRegionData> &gradientVector) {
 
   /*Sobel operators:
@@ -302,31 +308,27 @@ void calculateLineGradients(const cv::Mat &image, const vector<struct region> &l
   for(unsigned int i=0;i< lineRegions.size();i++) {
 
 
-    lineData.upperPoint.x = lineRegions[i].startPoint.x;
     lineData.upperPoint.y = lineRegions[i].startPoint.y;
-    lineData.lowerPoint.x = lineRegions[i].endPoint.x;
+    lineData.upperPoint.x = lineRegions[i].startPoint.x;
     lineData.lowerPoint.y = lineRegions[i].endPoint.y;
+    lineData.lowerPoint.x = lineRegions[i].endPoint.x;
 
-    if(boundaryCheck(image,lineData.upperPoint.x,lineData.upperPoint.y)) {
-      lineData.upperVerticalGradient = 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
-      lineData.upperHorizontalGradient = -1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x-1,lineData.upperPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.x,lineData.upperPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.x+1,lineData.upperPoint.y+1)[0];
+    if(boundaryCheck(image,lineData.upperPoint.y,lineData.upperPoint.x)) {
+      lineData.upperVerticalGradient = 1 * image.at<cv::Vec3b>(lineData.upperPoint.y-1,lineData.upperPoint.x-1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.y-1,lineData.upperPoint.x)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.y-1,lineData.upperPoint.x+1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.x-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.x)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.x+1)[0];
+      lineData.upperHorizontalGradient = -1 * image.at<cv::Vec3b>(lineData.upperPoint.y-1,lineData.upperPoint.x-1)[0] - 2 * image.at<cv::Vec3b>(lineData.upperPoint.y,lineData.upperPoint.x-1)[0] - 1 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.x-1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.y-1,lineData.upperPoint.x+1)[0] + 2 * image.at<cv::Vec3b>(lineData.upperPoint.y,lineData.upperPoint.x+1)[0] + 1 * image.at<cv::Vec3b>(lineData.upperPoint.y+1,lineData.upperPoint.x+1)[0];
     }
-    if(boundaryCheck(image,lineData.lowerPoint.x,lineData.lowerPoint.y)) {
-      lineData.lowerVerticalGradient = -1 * (1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
-      lineData.lowerHorizontalGradient = -1 * (-1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y-1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y-1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y-1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x-1,lineData.lowerPoint.y+1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.x,lineData.lowerPoint.y+1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.x+1,lineData.lowerPoint.y+1)[0]);
+    if(boundaryCheck(image,lineData.lowerPoint.y,lineData.lowerPoint.x)) {
+      lineData.lowerVerticalGradient = -1 * (1 * image.at<cv::Vec3b>(lineData.lowerPoint.y-1,lineData.lowerPoint.x-1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.y-1,lineData.lowerPoint.x)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y-1,lineData.lowerPoint.x+1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y+1,lineData.lowerPoint.x+1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.y+1,lineData.lowerPoint.x)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y+1,lineData.lowerPoint.x+1)[0]);
+      lineData.lowerHorizontalGradient = -1 * (-1 * image.at<cv::Vec3b>(lineData.lowerPoint.y-1,lineData.lowerPoint.x-1)[0] - 2 * image.at<cv::Vec3b>(lineData.lowerPoint.y,lineData.lowerPoint.x-1)[0] - 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y+1,lineData.lowerPoint.x-1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y-1,lineData.lowerPoint.x+1)[0] + 2 * image.at<cv::Vec3b>(lineData.lowerPoint.y,lineData.lowerPoint.x+1)[0] + 1 * image.at<cv::Vec3b>(lineData.lowerPoint.y+1,lineData.lowerPoint.x+1)[0]);
     }
     gradientVector.push_back(lineData);
   }
 }
 
-double evaluateAdjacentPoints(const vector<cv::Vec6i> &gradientVector) {
-}
 
 double scalarProduct(struct coordinate point1, struct coordinate point2) {
   return point1.x*point2.x+point1.y*point2.y;
 }
-
-
 
 double evaluateAdjacentPoints( vector<struct lineRegionData> &gradientVector) {
   for(unsigned int i = 0; i < gradientVector.size(); i++) {
