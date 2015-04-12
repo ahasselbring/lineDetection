@@ -14,6 +14,8 @@ struct region {
   struct coordinate startPoint;
   //x and y coordinate of the region end point
   struct coordinate endPoint;
+
+  struct coordinate middlePoint;
 };
 
 struct gradient {
@@ -72,6 +74,9 @@ struct lineRegionData {
   double upperLineliness;
   double lowerLineliness;
 };
+struct coordinate subtractVector(struct coordinate point1, struct coordinate point2);
 
+
+struct coordinate addVector(struct coordinate point1, struct coordinate point2);
 #endif // MAIN_HPP
 

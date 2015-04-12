@@ -192,6 +192,10 @@ void classifyRegions(cv::Mat &image, std::vector<struct coordinate> &edges, std:
     if(unknownRegions[i].startPoint.y > 0 && unknownRegions[i].endPoint.y < image.size().height ) { //TODO some regions are not processed
       if( (image.at<cv::Vec3b>(unknownRegions[i].startPoint.y-1,unknownRegions[i].startPoint.x)[0]) < image.at<cv::Vec3b>( unknownRegions[i].startPoint.y,unknownRegions[i].startPoint.x)[0] ) {
         if( (image.at<cv::Vec3b>(unknownRegions[i].endPoint.y+1,unknownRegions[i].startPoint.x)[0]) < image.at<cv::Vec3b>( unknownRegions[i].endPoint.y,unknownRegions[i].startPoint.x)[0]) {
+          struct coordinate middlePointer = subtractVector(unknownRegions[i].startPoint, unknownRegions[i].endPoint);
+          middlePointer.x = middlePointer.x / 2;
+          middlePointer.y = middlePointer.y / 2;
+          unknownRegions[i].middlePoint = addVector(middlePointer, unknownRegions[i].endPoint);
           lineRegions.push_back(unknownRegions[i]);
         }
       }
@@ -255,14 +259,14 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
 //      imageRegions.at<cv::Vec3b>(y,column) = green;
 //    }
 //  }
-//  for(unsigned int i=0; i<lineRegions.size(); i++){
-//    int startY = lineRegions[i].startPoint.y;
-//    int endY = lineRegions[i].endPoint.y;
-//    int column = lineRegions[i].startPoint.x;
-//    for(int y=startY; y<=endY; y++){
-//      imageRegions.at<cv::Vec3b>(y,column) = cyan;
-//    }
-//  }
+  for(unsigned int i=0; i<lineRegions.size(); i++){
+    int startY = lineRegions[i].middlePoint.y;
+    int endY = lineRegions[i].middlePoint.y;
+    int column = lineRegions[i].middlePoint.x;
+    for(int y=startY; y<=endY; y++){
+      imageRegions.at<cv::Vec3b>(y,column) = red;
+    }
+  }
 
 //  for(unsigned int i=0; i<gradientVector.size(); i++){
 //    cv::line(imageRegions, cv::Point(gradientVector[i].upperPoint.x,gradientVector[i].upperPoint.y), cv::Point(gradientVector[i].upperGradient.horizontal / 10+ gradientVector[i].upperPoint.x,gradientVector[i].upperGradient.vertical / 10 +gradientVector[i].upperPoint.y),cv::Scalar(blue),1,8);
@@ -281,9 +285,9 @@ void drawResults(cv::Mat &imageRegions, vector<struct region> &fieldRegions, vec
 //  }
 
   for(unsigned int i = 0; i < lineVector.size(); i ++) {
-    for(unsigned int j = 0; j < lineVector[i].linePoints.size(); j+=2) {
-      cv::line(imageRegions, cv::Point(lineVector[i].linePoints[j].x,lineVector[i].linePoints[j].y),cv::Point(lineVector[i].linePoints[j+1].x,lineVector[i].linePoints[j+1].y), cv::Scalar(blue) );
-    }
+    //for(unsigned int j = 0; j < lineVector[i].linePoints.size(); j+=2) {
+      cv::line(imageRegions, cv::Point(lineVector[i].startPoint.x,lineVector[i].startPoint.y),cv::Point(lineVector[i].endPoint.x,lineVector[i].endPoint.y), cv::Scalar(blue) );
+    //}
   }
 }
 
@@ -384,6 +388,63 @@ double absVector(struct coordinate vec) {
 
 double absVector(struct gradient vec) {
   return ( sqrt(pow(vec.vertical,2)+ pow(vec.horizontal,2)));
+}
+
+
+double distanceToLine(struct coordinate point1, struct coordinate point2, struct coordinate poi) {
+  return fabsf(  (point2.y - point1.y) * poi.x - (point2.x - point1.x) * poi.y + point2.x * point1.y - point2.y * point1.x) / (absVector(subtractVector(point2,point1)));
+}
+
+void ransac(vector<struct region> &lineRegions, vector<lineData> &lineVector) {
+  srand (time(NULL));
+  struct lineData bestLine, tempLine;
+  vector<struct region> tempRemaining, bestRemaining;
+  int score, maxScore = 0;
+
+  int randomIndex2 = 0;
+  int randomIndex1 = 0;
+
+  for(int iterationen = 0; iterationen < 20; iterationen++) {
+
+    randomIndex1 = rand() % lineRegions.size();
+    randomIndex2 = rand() % lineRegions.size();
+
+    struct coordinate direction = subtractVector(lineRegions[randomIndex1].middlePoint , lineRegions[randomIndex2].middlePoint);
+    struct coordinate point1 = lineRegions[randomIndex1].middlePoint;
+    struct coordinate point2 = lineRegions[randomIndex2].middlePoint;
+    tempLine.startPoint = point1;
+    tempLine.endPoint = point2;
+    tempLine.linePoints.clear();
+    tempRemaining.clear();
+    score = 0;
+    for(int i = 0; i < lineRegions.size(); i++ )  {
+      double dist = distanceToLine(point1,point2,lineRegions[i].middlePoint);
+      cout << "distance " << i << "  :" << dist << endl;
+      if(dist < 3) {
+
+        tempLine.linePoints.push_back(lineRegions[i].middlePoint);
+        score ++;
+      } else {
+
+        tempRemaining.push_back(lineRegions[i]);
+        //score --;
+      }
+
+    }
+    cout << "score: " << score << " maxScore " << maxScore <<  endl;
+    if(score > maxScore) {
+      maxScore = score;
+      bestLine = tempLine;
+      bestRemaining = tempRemaining;
+    }
+
+  }
+  if(bestRemaining.size() > 5) ransac(bestRemaining,lineVector);
+
+  lineVector.push_back(bestLine);
+
+
+
 }
 
 void createEdgePointPairs( vector<struct lineRegionData> &gradientVector, vector<struct edgePointPair> &edgePointPairs) {
@@ -550,8 +611,9 @@ int main() {
   delta3 = chrono::system_clock::now() - startTime - delta1 - delta2;
   createEdgePointPairs(gradientVector, edgePointPairs );
   delta4 = chrono::system_clock::now() - startTime - delta1 - delta2 - delta3;
-  groupLinePairs(edgePointPairs,lineVector);
+  //groupLinePairs(edgePointPairs,lineVector);
   delta5 = chrono::system_clock::now() - startTime - delta1 - delta2 - delta3 - delta4;
+  ransac(lineRegions,lineVector);
   drawResults(imageRegions, fieldRegions, lineRegions, unknownRegions, gradientVector, edges, edgePointPairs, lineVector);
 
   cout << "fieldRegions: " << fieldRegions.size() << endl;
